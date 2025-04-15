@@ -11,6 +11,7 @@
 
     <modules>
         <module>trans_backend_gateway</module>
+        <module>trans_backend_admin</module>
     </modules>
 
     <properties>
