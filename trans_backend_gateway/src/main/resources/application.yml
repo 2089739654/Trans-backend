@@ -1,0 +1,18 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /gateway
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: admin
+          uri: http://localhost:8081
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1
+  main:
+    web-application-type: reactive
