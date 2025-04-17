@@ -5,6 +5,15 @@ server:
 spring:
   application:
     name: gateway
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/trans_backend
+    username: root
+    password: wangze512
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
   cloud:
     gateway:
       routes:
@@ -12,7 +21,16 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/admin/**
-          filters:
-            - StripPrefix=1
   main:
     web-application-type: reactive
+  web:
+    resources:
+      static-locations: classpath:/web/
+
+auth:
+ loginUrl: http://localhost:8080/test.html
+gateway:
+  ignore:
+    urls:
+      - "/admin/login"
+      - "/admin/register"
