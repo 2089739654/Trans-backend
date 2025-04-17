@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.trans_backend_admin.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.trans_backend_admin.model.entity.User">
+            <id property="id" column="id" />
+            <result property="userAcount" column="user_acount" />
+            <result property="userPassword" column="user_password" />
+            <result property="userRole" column="user_role" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_acount,user_password,user_role,create_time,update_time
+    </sql>
+</mapper>
