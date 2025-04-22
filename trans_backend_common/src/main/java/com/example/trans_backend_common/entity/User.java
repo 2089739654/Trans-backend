@@ -1,4 +1,4 @@
-package com.example.trans_backend_admin.model.entity;
+package com.example.trans_backend_common.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

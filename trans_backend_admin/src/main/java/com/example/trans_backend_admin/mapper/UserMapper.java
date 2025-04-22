@@ -1,6 +1,6 @@
 package com.example.trans_backend_admin.mapper;
 
-import com.example.trans_backend_admin.model.entity.User;
+import com.example.trans_backend_common.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -1,8 +1,7 @@
 package com.example.trans_backend_admin.service;
 
-import com.example.trans_backend_admin.model.entity.User;
+import com.example.trans_backend_common.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.trans_backend_common.common.BaseResponse;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 */
 public interface UserService extends IService<User> {
 
-    long userRegister(String userAccount, String userPassword, String userName);
+    User userRegister(String userAccount, String userPassword, String userName);
 
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 }

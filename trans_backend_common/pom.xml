@@ -24,6 +24,12 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.9</version>
+        </dependency>
+
 
     </dependencies>
 

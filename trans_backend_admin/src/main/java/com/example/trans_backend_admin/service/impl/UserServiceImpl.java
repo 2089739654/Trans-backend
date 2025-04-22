@@ -2,17 +2,15 @@ package com.example.trans_backend_admin.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.trans_backend_admin.model.entity.User;
+import com.example.trans_backend_common.entity.User;
 import com.example.trans_backend_admin.service.UserService;
 import com.example.trans_backend_admin.mapper.UserMapper;
-import com.example.trans_backend_common.common.BaseResponse;
-import com.example.trans_backend_common.common.ResultUtils;
 import com.example.trans_backend_common.enums.UserRoleEnum;
 import com.example.trans_backend_common.exception.BusinessException;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -38,7 +36,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private RedisTemplate<String,Object> redisTemplate;
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String userName) {
+    public User userRegister(String userAccount, String userPassword, String userName) {
         // 1. 校验参数
         if (StrUtil.hasBlank(userAccount, userPassword, userName)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -50,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
         }
         QueryWrapper<User>queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
+        queryWrapper.eq("user_account", userAccount);
         Long l = baseMapper.selectCount(queryWrapper);
         ThrowUtils.throwIf(l>0,ErrorCode.PARAMS_ERROR, "用户账号已存在");
         String encryptPassword = getEncryptPassword(userPassword);
@@ -59,9 +57,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         user.setUserName(userName);
         user.setUserRole(UserRoleEnum.USER.getValue());
+        String token ="login:"+UUID.randomUUID().toString();
+        user.setToken(token);
         int insert = baseMapper.insert(user);
         ThrowUtils.throwIf(insert <= 0, ErrorCode.SYSTEM_ERROR, "注册失败");
-        return user.getId();
+        //存redis
+        redisTemplate.opsForValue().set(token,user, 60 * 60 * 24, TimeUnit.SECONDS);
+        //脱敏处理
+        user.setUserPassword("");
+        return user;
     }
 
     @Override
@@ -80,16 +84,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String encryptPassword = getEncryptPassword(userPassword);
         // 3. 查询数据库中的用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
-        queryWrapper.eq("userPassword", encryptPassword);
+        queryWrapper.eq("user_account", userAccount);
+        queryWrapper.eq("user_password", encryptPassword);
         User user = this.baseMapper.selectOne(queryWrapper);
         ThrowUtils.throwIf(user == null, ErrorCode.PARAMS_ERROR, "用户不存在");
-        //存redis
-        String token ="login:"+UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(token,user, 60 * 60 * 24, TimeUnit.SECONDS);
+        if(user.getToken()!=null&&redisTemplate.opsForValue().get(user.getToken())!=null){
+            //续期token
+            redisTemplate.opsForValue().set(user.getToken(),user, 60 * 60 * 24, TimeUnit.SECONDS);
+        }else {
+            //生成新的token
+            String token ="login:"+UUID.randomUUID().toString();
+            redisTemplate.opsForValue().set(token,user, 60 * 60 * 24, TimeUnit.SECONDS);
+            user.setToken(token);
+            baseMapper.update(user,new UpdateWrapper<User>().eq("id",user.getId()));
+        }
         //脱敏处理
         user.setUserPassword("");
-        user.setToken(token);
         return user;
     }
 

@@ -3,7 +3,7 @@ package com.example.trans_backend_admin.controller;
 
 import com.example.trans_backend_admin.model.dto.UserLoginRequest;
 import com.example.trans_backend_admin.model.dto.UserRegisterRequest;
-import com.example.trans_backend_admin.model.entity.User;
+import com.example.trans_backend_common.entity.User;
 import com.example.trans_backend_admin.service.UserService;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.common.ResultUtils;
@@ -12,7 +12,6 @@ import com.example.trans_backend_common.exception.ThrowUtils;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -28,13 +27,13 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
+    public BaseResponse<User> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         ThrowUtils.throwIf(userRegisterRequest == null, ErrorCode.PARAMS_ERROR);
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String userName = userRegisterRequest.getUserName();
-        long userId = userService.userRegister(userAccount, userPassword, userName);
-        return ResultUtils.success(userId);
+        User user = userService.userRegister(userAccount, userPassword, userName);
+        return ResultUtils.success(user);
     }
 
     /**

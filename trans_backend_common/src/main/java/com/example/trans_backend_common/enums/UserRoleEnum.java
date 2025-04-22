@@ -3,7 +3,7 @@ package com.example.trans_backend_common.enums;
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
 
-@Getter
+
 public enum UserRoleEnum {
     USER("用户", "user"),
     VIP("会员", "vip"),
@@ -16,6 +16,14 @@ public enum UserRoleEnum {
     UserRoleEnum(String text, String value) {
         this.text = text;
         this.value = value;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     /**
