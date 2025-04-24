@@ -6,6 +6,17 @@ spring:
     url: jdbc:mysql://localhost:3306/trans_backend
     username: root
     password: wangze512
+  rabbitmq:
+    connection-timeout: 1s
+    template:
+      retry:
+        enabled: true # 开启超时重试机制
+    publisher-returns: true
+    publisher-confirm-type: correlated
+  elasticsearch:
+    uris: http://localhost:9200
+
+
 server:
   port: 8082
 

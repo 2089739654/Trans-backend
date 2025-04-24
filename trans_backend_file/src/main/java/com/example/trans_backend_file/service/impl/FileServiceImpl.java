@@ -6,15 +6,21 @@ import com.example.trans_backend_common.entity.User;
 import com.example.trans_backend_common.exception.BusinessException;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
+import com.example.trans_backend_file.config.MqConfig;
 import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.mapper.FileMapper;
 import com.example.trans_backend_file.util.MinioUtil;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.UUID;
 
 /**
 * @author 20897
@@ -24,6 +30,15 @@ import java.sql.SQLException;
 @Service
 public class FileServiceImpl extends ServiceImpl<FileMapper, File>
     implements FileService {
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${mq:exchange}")
+    private String EXCHANGE;
+
+    @Value("${mq:routingKey}")
+    private String ROUTING_KEY;
 
 
 
@@ -62,6 +77,14 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
             //发送消息队列 todo
         }
         //发送解析任务
+
+        try {
+            rabbitTemplate.convertAndSend(EXCHANGE,ROUTING_KEY,
+                    MqConfig.getMessage(file1, UUID.randomUUID().toString()),MqConfig.getCorrelationData());
+        } catch (AmqpException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"消息发送失败:"+e.getMessage());
+        }
+
         return path;
     }
 
