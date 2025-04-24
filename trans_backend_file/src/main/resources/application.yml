@@ -1,5 +1,21 @@
 spring:
   application:
     name: file
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/trans_backend
+    username: root
+    password: wangze512
 server:
   port: 8082
+
+minio:
+  endpoint: http://localhost:9000
+  bucketName: test
+  accessKey: minioadmin
+  secretKey: minioadmin
+
+baidu:
+  appId: your_app_id
+  secretKey: your_secret_key
+#elasti
