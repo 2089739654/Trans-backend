@@ -14,6 +14,7 @@
         <module>trans_backend_admin</module>
         <module>trans_backend_common</module>
         <module>trans_backend_file</module>
+        <module>trans_backend_pay</module>
     </modules>
 
     <properties>

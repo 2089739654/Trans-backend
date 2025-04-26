@@ -1,9 +1,9 @@
-package com.example.trans_backend_file.manager;
+package com.example.trans_backend_file.manager.translate.impl;
 
 
+import com.example.trans_backend_file.manager.translate.TranslateService;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.example.trans_backend_common.exception.BusinessException;
@@ -18,18 +18,18 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Random;
 
 
 @Component
-public class TranslateService {
+public class TranslateServiceByBaidu implements TranslateService {
 
     @Value("${baidu.appId}")
     private static String APP_ID;
@@ -41,9 +41,9 @@ public class TranslateService {
     private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
 
     // 创建连接池
-    private static final CloseableHttpClient httpClient = HttpClients.createDefault();
+    private  final CloseableHttpClient httpClient = HttpClients.createDefault();
 
-    public  static  String translate(String text,String fromLang,String toLang){
+    public  String translate(String text,String fromLang,String toLang){
         try {
             // 生成随机数
             Random random = new Random();
@@ -112,7 +112,7 @@ public class TranslateService {
 
 
 
-    public static String translateText(String text) {
+    public  String translateText(String text) {
         try {
             Random random = new Random();
             int salt = random.nextInt(32768) + 32768;
@@ -146,11 +146,12 @@ public class TranslateService {
     }
 
 
+    @Override
+    public List<String> translate(List<String> text, String from, String to) {
+        // 批量翻译
 
 
 
-
-
-
-
+        return null;
+    }
 }

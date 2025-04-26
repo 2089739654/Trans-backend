@@ -1,4 +1,4 @@
-package com.example.trans_backend_file.service;
+package com.example.trans_backend_file.manager.resolve;
 
 public interface ResolveService {
 
