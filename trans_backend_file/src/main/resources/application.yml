@@ -13,6 +13,10 @@ spring:
         enabled: true # 开启超时重试机制
     publisher-returns: true
     publisher-confirm-type: correlated
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   elasticsearch:
     uris: http://localhost:9200
 
@@ -29,4 +33,9 @@ minio:
 baidu:
   appId: your_app_id
   secretKey: your_secret_key
+
+elasticsearch:
+  host: localhost
+  port: 9200
+  scheme: http
 #elasti

@@ -1,5 +1,6 @@
-package com.example.trans_backend_file.manager;
+package com.example.trans_backend_file.manager.resolve.impl;
 
+import com.example.trans_backend_file.manager.ResolveManager;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PdfResolveManager extends ResolveManager{
+public class PdfResolveManager extends ResolveManager {
 
     @Override
-    protected void doResolve(InputStream inputStream) {
+    protected List<String> doResolve(InputStream inputStream) {
 
         List<String> result=new ArrayList<>();
         try(PDDocument pdDocument=PDDocument.load(inputStream)){
@@ -40,9 +41,7 @@ public class PdfResolveManager extends ResolveManager{
         }catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
+        return result;
 
     }
 }
