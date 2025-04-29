@@ -1,9 +1,12 @@
 package com.example.trans_backend_file.manager.translate.impl;
 
 
+import com.example.trans_backend_common.exception.ThrowUtils;
+import com.example.trans_backend_file.manager.connection.impl.BaiduConnectionFactory;
 import com.example.trans_backend_file.manager.translate.TranslateService;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.example.trans_backend_common.exception.BusinessException;
@@ -15,6 +18,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,118 +35,27 @@ import java.util.Random;
 @Component
 public class TranslateServiceByBaidu implements TranslateService {
 
-    @Value("${baidu.appId}")
-    private static String APP_ID;
+    @Resource
+    private BaiduConnectionFactory baiduConnectionFactory;
 
-
-    @Value("${baidu.secretKey}")
-    private static String SECRET_KEY;
-
-    private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
-
-    // 创建连接池
-    private  final CloseableHttpClient httpClient = HttpClients.createDefault();
-
-    public  String translate(String text,String fromLang,String toLang){
+    public  String translateText(String text) {
         try {
-            // 生成随机数
-            Random random = new Random();
-            int salt = random.nextInt(32768) + 32768;
-
-            // 拼接签名原文
-            String sign =APP_ID + text + salt + SECRET_KEY;
-            String signMd5 = md5(sign);
-
-            // 构建请求参数
-            String query = "q=" + URLEncoder.encode(text, "UTF-8")
-                    + "&from=" + fromLang
-                    + "&to=" + toLang
-                    + "&appid=" + APP_ID
-                    + "&salt=" + salt
-                    + "&sign=" + signMd5;
-
-            // 发送 HTTP 请求
-            URL url = new URL(API_URL + "?" + query);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-
-            // 获取响应
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-
-            // 解析 JSON 响应
-            JSONObject jsonResponse = new JSONObject(response.toString());
+            HttpClient httpClient = baiduConnectionFactory.getHttpClient();
+            HttpGet httpGet=baiduConnectionFactory.getHttpGet(text);
+            HttpResponse response = httpClient.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            ThrowUtils.throwIf(entity == null, ErrorCode.SYSTEM_ERROR,"翻译失败");
+            String responseString = EntityUtils.toString(entity, "UTF-8");
+            JSONObject jsonResponse = new JSONObject(responseString);
             if (jsonResponse.has("trans_result")) {
                 JSONArray transResult = jsonResponse.getJSONArray("trans_result");
                 return transResult.getJSONObject(0).getString("dst");
             } else {
-                System.out.println("翻译出错: " + jsonResponse.optString("error_msg", "未知错误"));
-                return null;
-            }
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"翻译失败");
-        }
-
-    }
-
-
-    // MD5 加密方法
-    private static String md5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] messageDigest = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : messageDigest) {
-                String hex = Integer.toHexString(0xFF & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-
-    public  String translateText(String text) {
-        try {
-            Random random = new Random();
-            int salt = random.nextInt(32768) + 32768;
-            String sign = APP_ID + text + salt + SECRET_KEY;
-            String signMd5 = md5(sign);
-            String query = "q=" + URLEncoder.encode(text, "UTF-8")
-                    + "&from=auto"
-                    + "&to=zh"
-                    + "&appid=" + APP_ID
-                    + "&salt=" + salt
-                    + "&sign=" + signMd5;
-            HttpGet httpGet = new HttpGet(API_URL + "?" + query);
-            HttpResponse response = httpClient.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                String responseString = EntityUtils.toString(entity, "UTF-8");
-                JSONObject jsonResponse = new JSONObject(responseString);
-                if (jsonResponse.has("trans_result")) {
-                    JSONArray transResult = jsonResponse.getJSONArray("trans_result");
-                    return transResult.getJSONObject(0).getString("dst");
-                } else {
-                    System.out.println("翻译出错: " + jsonResponse.optString("error_msg", "未知错误"));
-                    return null;
-                }
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"翻译失败");
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"翻译失败");
         }
-        return null;
     }
 
 

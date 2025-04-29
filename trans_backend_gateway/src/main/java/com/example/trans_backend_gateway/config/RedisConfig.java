@@ -30,6 +30,16 @@ public class RedisConfig {
     }
 
     @Bean
+    public RedisTemplate<String,Long> stringLongRedisTemplate(RedisConnectionFactory redisConnectionFactory){
+        RedisTemplate<String,Long> redisTemplate=new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+
+
+    @Bean
     public RedisSerializer<Object> redisSerializer() {
         //创建JSON序列化器
         Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);

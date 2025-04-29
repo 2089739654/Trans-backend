@@ -1,7 +1,9 @@
-package com.example.trans_backend_file.manager;
+package com.example.trans_backend_file.manager.resolve.impl;
 
 import com.example.trans_backend_common.exception.BusinessException;
 import com.example.trans_backend_common.exception.ErrorCode;
+import com.example.trans_backend_file.manager.TranslationManager;
+import com.example.trans_backend_file.manager.resolve.ResolveService;
 import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.util.MinioUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ResolveManager {
+public abstract class ResolveManager implements ResolveService {
 
 
     @Value("${minio.bucketName}")

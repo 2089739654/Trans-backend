@@ -1,9 +1,7 @@
 package com.example.trans_backend_file.manager.resolve.impl;
 
-import com.example.trans_backend_file.manager.ResolveManager;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.PDFTextStripperByArea;
 
 import java.io.IOException;
 import java.io.InputStream;

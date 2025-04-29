@@ -23,6 +23,8 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    context-path: /file
 
 minio:
   endpoint: http://localhost:9000
@@ -33,9 +35,9 @@ minio:
 baidu:
   appId: your_app_id
   secretKey: your_secret_key
-
+aliyun:
+  apiKey: your_api_key
 elasticsearch:
   host: localhost
   port: 9200
   scheme: http
-#elasti

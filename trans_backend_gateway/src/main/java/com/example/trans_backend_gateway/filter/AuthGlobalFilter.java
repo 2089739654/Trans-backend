@@ -7,6 +7,7 @@ import com.example.trans_backend_gateway.config.IgnoreUrlsConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -19,10 +20,11 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Resource;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Component
-public class AuthGlobalFilter implements GlobalFilter {
+public class AuthGlobalFilter implements GlobalFilter , Ordered {
 
 
 
@@ -40,7 +42,7 @@ public class AuthGlobalFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String token = exchange.getRequest().getHeaders().getFirst(UserConstant.TOKEN);
         if(token!=null){
-            User user = (User) redisTemplate.opsForValue().get(token);
+            User user = (User) redisTemplate.opsForValue().getAndExpire(token, 60 * 60 * 24, TimeUnit.SECONDS);
             if(user!=null){
                 ServerHttpRequest serverHttpRequest = exchange.getRequest().mutate().header(UserConstant.TOKEN, JSONUtil.toJsonStr(user)).build();
                 exchange = exchange.mutate().request(serverHttpRequest).build();
@@ -69,4 +71,8 @@ public class AuthGlobalFilter implements GlobalFilter {
         return false;
     }
 
+    @Override
+    public int getOrder() {
+        return Integer.MIN_VALUE;
+    }
 }

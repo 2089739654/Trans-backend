@@ -30,6 +30,11 @@ spring:
 auth:
  loginUrl: http://localhost:8080/test.html
 gateway:
+  ipRateList:
+#    测试数据
+    - ip: 1
+      rate: 1
+      capacity: 1
   ignore:
     urls:
       - "/admin/login"
