@@ -22,3 +22,4 @@ public class DonateController {
         return ResultUtils.success(s);
     }
 }
+
