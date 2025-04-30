@@ -20,7 +20,7 @@ public class ResultUtils {
      * @param errorCode 错误码
      * @return 响应
      */
-    public static BaseResponse<?> error(ErrorCode errorCode) {
+    public static BaseResponse<ErrorCode> error(ErrorCode errorCode) {
         return new BaseResponse<>(errorCode);
     }
 

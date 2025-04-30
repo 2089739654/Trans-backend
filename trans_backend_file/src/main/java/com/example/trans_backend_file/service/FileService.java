@@ -4,6 +4,8 @@ import com.example.trans_backend_file.model.entity.File;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
 * @author 20897
 * @description 针对表【file】的数据库操作Service
@@ -14,4 +16,5 @@ public interface FileService extends IService<File> {
     String upload(MultipartFile file);
 
 
+    List<File> selectAll(int ProjectId);
 }

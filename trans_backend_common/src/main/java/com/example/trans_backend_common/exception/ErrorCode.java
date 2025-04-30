@@ -14,7 +14,10 @@ public enum ErrorCode {
     FORBIDDEN_ERROR(40300, "禁止访问"),
     SYSTEM_ERROR(50000, "系统内部异常"),
     OPERATION_ERROR(50001, "操作失败"),
-    GATEWAY_ERROR(50004,"网关异常");
+    GATEWAY_ERROR(50004,"网关异常"),
+    PROJECT_ERROR(50005,"项目创建失败"),
+    PROJECT_UPDATE_ERROR(50005,"项目修改失败"),
+    PROJECT_DELETE_ERROR(50005,"项目修改失败");
 
     private final int code;
 

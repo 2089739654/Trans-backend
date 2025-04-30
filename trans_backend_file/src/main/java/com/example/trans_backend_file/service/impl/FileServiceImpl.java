@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -86,6 +88,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
         }
 
         return path;
+    }
+
+    @Override
+    public List<File> selectAll(int ProjectId) {
+        return listByIds(Collections.singletonList(ProjectId));
     }
 
 }
