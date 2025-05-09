@@ -1,0 +1,50 @@
+{ 
+    "title": "《胖猫小品》",
+    "fullText": [
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "baseText": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "finalText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "baseText": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "finalText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "baseText": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "finalText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "baseText": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "finalText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "baseText": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "finalText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "baseText": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "finalText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "baseText": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "finalText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "baseText": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "finalText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "baseText": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "finalText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        }
+    ]
+}

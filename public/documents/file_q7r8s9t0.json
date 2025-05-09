@@ -1,0 +1,15 @@
+{
+    "title": "《AI广场舞》",
+    "fullText": [
+        {
+            "originalText": "Dancing shoes sync with Milky Way playlist, auntie's silk scarf controls weather. The speaker grows medicinal herbs, mayor wants to patent our shuffle dance moves",
+            "baseText": "舞鞋同步银河系歌单，阿姨的丝巾控制天气，音响种草药，市长想给我们的鬼步舞申请专利",
+            "finalText": "星际蹦迪鞋，歌单跨旋臂同步。阿姨的丝巾呼风唤雨，低音炮里种人参，市长要申遗我们的魔性舞步"
+        },
+        {
+            "originalText": "Moon cake mold prints Tiktok trends, our spaceship group buys black hole coupons. Alien customers give five-star reviews, Jupiter's storms are free shipping zones",
+            "baseText": "月饼模具打印抖音热搜，我们飞船团购黑洞优惠券，外星顾客给五星好评，木星风暴是包邮区",
+            "finalText": "登月模具，热榜直接刻在月饼上。星舰拼团黑洞第二件半价，三体人五星好评，木星之眼包邮到家"
+        }
+    ]
+}
