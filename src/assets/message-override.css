@@ -1,0 +1,84 @@
+/* message-override.css */
+
+.custom-messagebox {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+    z-index: 9999 !important;
+    width: 480px;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border: none !important;
+}
+
+/* 标题栏 */
+.custom-messagebox .el-message-box__header {
+display: flex !important;        /* 启用 Flex 布局 */
+justify-content: space-between; /* 标题与关闭按钮两端对齐 */
+align-items: center;             /* 垂直居中 */
+background: linear-gradient(90deg, #4c8bff, #6c5ce7) !important;
+border-radius: 12px 12px 0 0 !important;
+padding: 18px 24px;
+/* 标题文本 */
+.el-message-box__title {
+    flex: 1;                         /* 占据剩余空间 */
+    text-align: center !important;   /* 强制文字居中 */
+    margin: 0 40px;                  /* 两侧留出关闭按钮空间 */
+    font-size: 20px !important;
+}
+/* 关闭按钮 */
+.el-message-box__headerbtn {
+    position: static !important;      /* 移除默认绝对定位 */
+    order: 2;                        /* 将关闭按钮移至右侧末尾 */
+}
+.el-message-box__headerbtn:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    }
+}
+
+/* 内容区域 */
+/* 内容容器布局 */
+.custom-messagebox .el-message-box__content {
+  display: flex !important;        /* 启用 Flex 布局 */
+  align-items: center !important; /* 垂直居中 */
+  justify-content: center !important; /* 水平居中 */
+  padding: 15px 20px !important;     /* 调整内边距 */
+  /* 图标与文字对齐 */
+  .el-message-box__status {
+    position: static !important;     /* 取消绝对定位 */
+    margin-right: 12px !important;   /* 图标与文字间距 */
+    flex-shrink: 0 !important;         /* 防止图标被挤压 */
+  }
+  
+  /* 文字居中 */
+  .el-message-box__message {
+    text-align: center !important;
+    margin: 0 !important;            /* 移除默认边距 */
+  }
+}
+
+
+/* 按钮组 */
+.custom-messagebox .el-message-box__btns {
+display: flex !important;
+justify-content: center !important; /* 水平居中 */
+gap: 20px !important; /* 按钮间距 */
+padding: 15px 0 !important; /* 上下内边距 */
+}
+
+/* 全局样式文件 */
+.custom-message {
+    /* 水平+垂直居中 */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;  /* 覆盖默认层级 */
+    position: relative;
+    /* 扩展样式调整 */
+    width: auto !important; 
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);  /* 增强视觉效果 */
+    /* 遮罩层覆盖 */
+}
