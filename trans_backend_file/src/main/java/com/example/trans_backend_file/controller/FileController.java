@@ -10,12 +10,14 @@ import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.util.MinioUtil;
+import com.oracle.webservices.internal.api.message.PropertySet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +34,19 @@ public class FileController {
         ThrowUtils.throwIf(file==null,ErrorCode.PARAMS_ERROR);
         return fileService.upload(file);
     }
-    @GetMapping("/allFiles")
-    public BaseResponse<List<File>> selectAllFiles(int ProjectId){
-        List<File> files = fileService.selectAll(ProjectId);
+    @GetMapping("/selectFiles")
+    public BaseResponse<List<File>> selectAllFiles(int projectId){
+        List<File> files = fileService.selectAll(projectId);
         return ResultUtils.success(files);
+    }
+    @PostMapping("/deleteFile")
+    public BaseResponse<?>  deleteFile(@RequestBody  List<Integer> list){
+        boolean b = fileService.deleteFiles(list);
+        if(b){
+            return ResultUtils.success(b);
+        }else{
+            return ResultUtils.error(ErrorCode.DELETE_ERROR);
+        }
     }
 
     @RequestMapping("/test")

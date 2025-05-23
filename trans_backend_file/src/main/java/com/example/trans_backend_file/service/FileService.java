@@ -17,4 +17,6 @@ public interface FileService extends IService<File> {
 
 
     List<File> selectAll(int ProjectId);
+
+    boolean deleteFiles(List<Integer> ids);
 }

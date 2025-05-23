@@ -54,8 +54,6 @@ public class ProjectController {
             return  ResultUtils.error(ErrorCode.PROJECT_ERROR);
 //            return new BaseResponse<ErrorCode>(ErrorCode.PROJECT_ERROR);
         }
-
-
     }
 
     /**
@@ -73,6 +71,7 @@ public class ProjectController {
             return ResultUtils.error(ErrorCode.PROJECT_UPDATE_ERROR);
         }
     }
+
     @PostMapping("/delete")
     @ApiOperation(value = "删除已经创建的项目")
     public BaseResponse<ErrorCode> deleteProject(@NotNull Long projectId) {

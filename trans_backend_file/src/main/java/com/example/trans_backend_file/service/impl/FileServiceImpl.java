@@ -6,15 +6,20 @@ import com.example.trans_backend_common.entity.User;
 import com.example.trans_backend_common.exception.BusinessException;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
+import com.example.trans_backend_file.TransBackendFileApplication;
 import com.example.trans_backend_file.config.MqConfig;
 import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.mapper.FileMapper;
 import com.example.trans_backend_file.util.MinioUtil;
+import org.apache.commons.math3.analysis.function.Min;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -32,6 +37,8 @@ import java.util.UUID;
 @Service
 public class FileServiceImpl extends ServiceImpl<FileMapper, File>
     implements FileService {
+    @Resource
+    MinioUtil minioUtil;
 
     @Resource
     private RabbitTemplate rabbitTemplate;
@@ -41,8 +48,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
 
     @Value("${mq:routingKey}")
     private String ROUTING_KEY;
-
-
+    @Autowired
+    private TransBackendFileApplication transBackendFileApplication;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
 
     @Override
@@ -94,6 +103,18 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
     public List<File> selectAll(int ProjectId) {
         return listByIds(Collections.singletonList(ProjectId));
     }
+
+    @Override
+    public boolean deleteFiles(List<Integer> ids) {
+        List<File> files = listByIds(ids);
+        try {
+            for (File file : files) MinioUtil.removeFile(file.getFilePath());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return removeByIds(ids);
+    }
+
 
 }
 
