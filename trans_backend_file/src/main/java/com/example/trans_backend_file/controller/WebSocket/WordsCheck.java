@@ -44,12 +44,15 @@ public class WordsCheck {
    @PostConstruct
    private void loadWords2Filter(){
        words=redisson.getBloomFilter("words");
-       boolean b = words.tryInit(40000L, 0.033);
-       URL resource = this.getClass().getClassLoader().getResource("dict.txt");
-       List<String> strings = FileUtil.readUtf8Lines(Objects.requireNonNull(resource));
-       for (String string : strings) {
-           boolean add = words.add(string);
+       boolean b = words.tryInit(400000L, 0.033);
+       if(b){
+           URL resource = this.getClass().getClassLoader().getResource("words.txt");
+           List<String> strings = FileUtil.readUtf8Lines(Objects.requireNonNull(resource));
+           for (String string : strings) {
+               boolean add = words.add(string);
+           }
        }
+
    }
 
     /**
