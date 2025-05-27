@@ -27,4 +27,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         BaseContext.setUser(user);
         return true;
     }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        BaseContext.remove();
+    }
 }

@@ -60,4 +60,6 @@ public class File {
     private String fileExtension;
 
     private String lngType;
+
+    private Long projectId;
 }

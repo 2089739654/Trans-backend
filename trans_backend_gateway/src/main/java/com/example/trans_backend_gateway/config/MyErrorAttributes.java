@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+//@Component
 public class MyErrorAttributes extends DefaultErrorAttributes {
     @Override
     public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {

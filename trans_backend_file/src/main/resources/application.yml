@@ -8,10 +8,16 @@ spring:
     password: wangze512
   rabbitmq:
     connection-timeout: 1s
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: false # 禁用自动重试(springboot默认开启 提供的消费者内部的重试)
     template:
       retry:
-        enabled: true # 开启超时重试机制
-    publisher-returns: true
+        enabled: true # 开启超时重试机制  发送方重试
+      mandatory: true # 开启强制投递机制
+    publisher-returns: true  # 开启发布确认机制
     publisher-confirm-type: correlated
     host: localhost
     port: 5672
@@ -19,6 +25,9 @@ spring:
     password: guest
   elasticsearch:
     uris: http://localhost:9200
+  redis:
+    port: 6379
+    host: 127.0.0.1
 
 
 server:
@@ -41,3 +50,14 @@ elasticsearch:
   host: localhost
   port: 9200
   scheme: http
+
+knife4j:
+  enable: true
+  openapi:
+    title: 接口文档
+    version: 1.0
+    group:
+      default:
+        api-rule: package
+        api-rule-resources:
+          - com.example.trans_backend_file.controller

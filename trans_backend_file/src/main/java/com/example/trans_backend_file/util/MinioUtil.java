@@ -5,6 +5,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.example.trans_backend_common.exception.BusinessException;
 import com.example.trans_backend_common.exception.ErrorCode;
+import com.example.trans_backend_common.exception.ThrowUtils;
+import com.example.trans_backend_file.model.entity.File;
 import com.google.common.base.Charsets;
 import io.minio.*;
 import lombok.extern.slf4j.Slf4j;
@@ -199,6 +201,17 @@ public class MinioUtil {
             objectNames.forEach(this::rm);
         }
 
+    }
+
+    public static InputStream getFileStream(File file){
+        //解析路径
+        String filePath = file.getFilePath();
+        int index = filePath.indexOf(minioUtil.bucketName) + minioUtil.bucketName.length();
+        String substring = filePath.substring(index+1);
+        //获取文件流
+        InputStream inputStream = MinioUtil.get(substring);
+        ThrowUtils.throwIf(inputStream == null, ErrorCode.SYSTEM_ERROR, "获取文件流失败");
+        return inputStream;
     }
 
 }

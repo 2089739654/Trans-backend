@@ -41,11 +41,7 @@ public class MyRedisLimiter {
         try {
             List<Long> response = this.redisTemplate.execute(this.redisScript, keys,
                     replenishRate+"",                    burstCapacity+"",                    Instant.now().getEpochSecond()+"",                    1+"");
-            if(response.get(0) ==0){
-                return false;
-            }else{
-                return true;
-            }
+            return response.get(0) != 0;
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return true;

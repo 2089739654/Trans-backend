@@ -5,6 +5,7 @@ import com.example.trans_backend_gateway.config.IpRateConfig;
 import com.example.trans_backend_gateway.config.RedisConfig;
 import com.example.trans_backend_gateway.limiter.MyRedisLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -19,6 +20,7 @@ import javax.annotation.Resource;
  * IP限流过滤器
  */
 @Component
+@ConditionalOnProperty(name = "gateway.ipRateEnable",havingValue = "true")
 public class IpRateGlobalFilter implements Ordered, GlobalFilter {
 
     @Autowired

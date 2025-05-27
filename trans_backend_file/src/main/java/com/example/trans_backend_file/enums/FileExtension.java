@@ -1,32 +1,37 @@
 package com.example.trans_backend_file.enums;
 
+import java.util.HashMap;
+
 public enum FileExtension {
-    PDF("pdf"),
-    DOC("doc"),
-    DOCX("docx"),
-    XLS("xls"),
-    XLSX("xlsx"),
-    PPT("ppt"),
-    PPTX("pptx"),
-    TXT("txt"),
-    CSV("csv"),
-    JPG("jpg"),
-    JPEG("jpeg"),
-    PNG("png"),
-    GIF("gif"),
-    BMP("bmp"),
-    MP4("mp4"),
-    AVI("avi"),
-    MKV("mkv"),
-    MOV("mov");
+    DOC("doc",""),
+    PPT("ppt",""),
+    TXT("txt","txtResolveManager");
+
+
 
     private final String extension;
 
-    FileExtension(String extension) {
+    private final String resolver;
+
+    FileExtension(String extension,String resolver) {
+        this.resolver=resolver;
         this.extension = extension;
     }
 
     public String getExtension() {
         return extension;
+    }
+
+    public String getResolver() {
+        return resolver;
+    }
+
+    public static FileExtension getByExtension(String extension) {
+        for (FileExtension fileExtension : values()) {
+            if (fileExtension.getExtension().equals(extension)) {
+                return fileExtension;
+            }
+        }
+        return null;
     }
 }

@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.9</version>
+            <version>3.4.3.4</version>
         </dependency>
 
         <!--pdf处理-->
@@ -121,6 +121,9 @@
             <artifactId>poi-scratchpad</artifactId>
             <version>4.1.2</version>
         </dependency>
+
+<!--        分页-->
+
 
 
 

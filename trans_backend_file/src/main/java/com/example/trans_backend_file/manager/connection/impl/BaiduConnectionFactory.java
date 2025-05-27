@@ -6,6 +6,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -13,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-
+@Component
 public class BaiduConnectionFactory extends AbstractConnectionFactory{
 
     @Value("${baidu.appId}")
@@ -39,7 +40,7 @@ public class BaiduConnectionFactory extends AbstractConnectionFactory{
                 setDefaultRequestConfig(requestConfig).build();
     }
 
-    public HttpGet getHttpGet(String text) throws UnsupportedEncodingException {
+    public HttpGet getHttpGet(String text,String from,String to) throws UnsupportedEncodingException {
         // 生成随机数
         Random random = new Random();
         int salt = random.nextInt(32768) + 32768;
@@ -48,8 +49,10 @@ public class BaiduConnectionFactory extends AbstractConnectionFactory{
         String signMd5 = md5(sign);
         // 构建请求参数
         String query = "q=" + URLEncoder.encode(text, "UTF-8")
-                + "&from=auto"
-                + "&to=zh"
+                + "&from="
+                + from
+                + "&to="
+                + to
                 + "&appid=" + APP_ID
                 + "&salt=" + salt
                 + "&sign=" + signMd5;

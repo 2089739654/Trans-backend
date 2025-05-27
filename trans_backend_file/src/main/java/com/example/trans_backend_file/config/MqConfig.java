@@ -27,6 +27,7 @@ public class MqConfig {
     @PostConstruct
     public void init(){
         rabbitTemplate.setReturnsCallback(returnedMessage -> {
+            //未发送到对于队列 returnCallback
             String messageId = returnedMessage.getMessage().getMessageProperties().getMessageId();
             log.error("监听到消息:"+messageId+"return callback");
             log.debug("exchange：{}", returnedMessage.getExchange());

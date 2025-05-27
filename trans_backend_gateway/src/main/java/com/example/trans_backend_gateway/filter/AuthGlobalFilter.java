@@ -42,8 +42,10 @@ public class AuthGlobalFilter implements GlobalFilter , Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String token = exchange.getRequest().getHeaders().getFirst(UserConstant.TOKEN);
         if(token!=null){
-            User user = (User) redisTemplate.opsForValue().getAndExpire(token, 60 * 60 * 24, TimeUnit.SECONDS);
+//            User user = (User) redisTemplate.opsForValue().getAndExpire(token, 60 * 60 * 24, TimeUnit.SECONDS);
+            User user = (User)redisTemplate.opsForValue().get(token);
             if(user!=null){
+                redisTemplate.expire(token, 60 * 60 * 24, TimeUnit.SECONDS);
                 ServerHttpRequest serverHttpRequest = exchange.getRequest().mutate().header(UserConstant.TOKEN, JSONUtil.toJsonStr(user)).build();
                 exchange = exchange.mutate().request(serverHttpRequest).build();
                 return chain.filter(exchange);

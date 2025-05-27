@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @SpringBootApplication
 @MapperScan("com.example.trans_backend_admin.mapper")
-@ComponentScan("com.example")
+@ComponentScan(basePackages = {"com.example.trans_backend_admin","com.example.trans_backend_common"})
 public class TransBackendAdminApplication {
 
     public static void main(String[] args) {
