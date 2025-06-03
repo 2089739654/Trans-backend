@@ -81,9 +81,9 @@ const handleLogin = async () => {
           }));
           console.log('kkk',localStorage)
           // 设置axios全局请求头
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          axios.defaults.headers.common['token'] = `${token}`;
           
-          router.push('/projects');
+          router.push('/projects');token
           ElMessage.success('登录成功');
         } else {
           ElMessage.error(message || '登录失败，请重试');

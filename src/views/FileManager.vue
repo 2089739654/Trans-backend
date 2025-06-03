@@ -149,9 +149,28 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
   for (let pair of formData.entries()) {
     console.log(pair[0] + ': ' + pair[1]);
   }
+
+  // 从 localStorage 获取 token
+  const token = localStorage.getItem('token');
+  console.log('token:',token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error('请先登录');
+    router.push('/login');
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      'token': token
+    }
+  };
+
   try {
-    const response = await axios.post('http://26.143.62.131:8080/file/upload', formData, {
+    const response = await axios.post('http://26.143.62.131:8080/file/upload', 
+    formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      config,
       onUploadProgress: progressEvent => {
         const progress = Math.round(
           (progressEvent.loaded * 100) / (progressEvent.total || 1)

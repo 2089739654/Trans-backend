@@ -42,7 +42,28 @@ const processChildren = (children: FileItem["children"]): FileItem[] => {
 const fetchText = async () => {
   //if (isFetched.value) return // 添加缓存判断
   try {
-    const response2 = await fetch("/mock/contents.json");
+    const token = localStorage.getItem('token');
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+    console.log('请求总督文件：',token);
+    // const config = {
+    //   headers: {
+    //     'token': token
+    //   }
+    // };
+    const response2 = await fetch(
+      "http://26.143.62.131:8080/file/project/projects",
+      {
+        method: 'GET', // 指定请求方法
+        headers: {
+          'token': token || '', // 添加 token 头
+          'Content-Type': 'application/json' // 如果需要
+        }
+      }
+    );
     // 关键校验：状态码和内容类型
     if (!response2.ok) console.log(`HTTP错误: ${response2.status}`);
     const contentType = response2.headers.get("Content-Type");
@@ -50,13 +71,54 @@ const fetchText = async () => {
       console.log("响应非 JSON 格式");
     }
     const jsonData = await response2.json();
+    console.log(jsonData)
+
+    // 获取子文件
+    const fetchChildren = async (projectId: string) => {
+      try {
+        const response = await fetch(
+          `http://26.143.62.131:8080/file/selectFiles?projectId=${projectId}`,
+          {
+            method: 'GET',
+            headers: {
+              'token': token,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`获取子文件失败: ${response.status}`);
+        }
+        
+        const jsonData = await response.json();
+        console.log('文件：',jsonData.data)
+        // 假设返回格式为 { data: [...] }
+        const returnData = jsonData.data.map((child:any) => ({
+          id: child.id,
+          name: child.fileName,
+          isFolder: false,
+          children: [] // 初始为空
+        }))
+        console.log(returnData)
+        return returnData;
+      } catch (error) {
+        console.error('获取子文件列表错误:', error);
+        ElMessage.error('加载文件列表失败');
+        return [];
+      }
+    };
+
     // 使用ref包裹整个响应数据
-    staticFiles.value = jsonData.map((item: FileItem) => ({
+    staticFiles.value = await Promise.all(
+      jsonData.data.map(async (item: FileItem) => ({
       id: item.id,
       name: item.name,
-      isFolder: item.isFolder || false,
-      children: item.children ? processChildren(item.children) : [],
-    }));
+      isFolder: true,
+      children: await fetchChildren(item.id),
+    })));
+
+
     console.log("请求json数据:", staticFiles.value);
     //isFetched.value = true
   } catch (error) {
@@ -329,15 +391,45 @@ const createRootFolder = async() => {
   // 关闭模态框
   createRootFolderVisible.value = false;
   try {
-    const response = await axios.post(`http://26.143.62.131:8080/admin/insert`, {
-      name: name,
-      //parentId: parentId || null, // 根文件夹的 parentId 为 null
-    });
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem('token');
+    console.log('token:',token);
+    // 如果没有 token，提示用户重新登录
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+    // 设置请求头
+    const config = {
+      headers: {
+        'token': token
+      }
+    };
+
+    const response = await axios.post(`http://26.143.62.131:8080/file/project/insert?name=${name}`, 
+      {},
+      // {
+      // name: name,
+      // //parentId: parentId || null, // 根文件夹的 parentId 为 null
+      // },
+      config
+    );
     // 提示成功
+    console.log('返回：',response.data.data)
+    newFolder.id = response.data.data;
+    console.log('文件夹：',newFolder);
     ElMessage.success(`文件夹 "${name}" 创建成功`);
     return response.data;
   } catch (error) {
     console.log('创建文件夹失败:', error);
+    // 处理 token 过期或无效的情况
+    if (error.response && error.response.status === 401) {
+      ElMessage.error('登录状态已过期，请重新登录');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      router.push('/login');
+    }
     throw error;
   }
 };
