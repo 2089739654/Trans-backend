@@ -1,0 +1,36 @@
+[
+{
+    "id": "folder_123e4567-e89b-12d3-a456-426614174000",
+    "name": "项目1",
+    "isFolder": true,
+    "children": [
+    {
+        "id": "file_a1b2c3d4",
+        "name": "项目需求.docx"
+    },
+    {
+        "id": "file_e5f6g7h8",
+        "name": "设计稿.sketch"
+    }
+    ]
+},
+{
+    "id": "folder_987f6543-e21b-47d3-a789-526714174000",
+    "name": "项目2",
+    "isFolder": true,
+    "children": [
+        {
+            "id": "file_i9j0k1l2",
+            "name": "项目需求.docx"
+        },
+        {
+            "id": "file_m3n4o5p6",
+            "name": "设计稿.sketch"
+        },
+        {
+            "id": "file_q7r8s9t0",
+            "name": "UI组件库.zip"
+        }
+    ]
+}
+]

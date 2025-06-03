@@ -1,0 +1,9 @@
+[
+    { "id": 1, "source": "Hypertension","trans": "高血压","domain": "医学","langPair": "EN-ZH","status": "已审核"},
+    { "id": 2, "source": "Cloud Computing","trans": "云计算", "domain": "信息技术", "langPair": "EN-ZH","status": "待审核"},
+    { "id": 3, "source": "Force Majeure", "trans": "不可抗力", "domain": "法律", "langPair": "FR-ZH", "status": "已审核"},
+    { "id": 4, "source": "Artificial Intelligence", "trans": "人工智能", "domain": "科技",  "langPair": "EN-JA", "status": "已审核"},
+    { "id": 5, "source": "Sustainability",  "trans": "持续可能性", "domain": "环境", "langPair": "EN-JA", "status": "待审核"},
+    { "id": 6,  "source": "Blockchain",  "trans": "区块链",  "domain": "金融科技",  "langPair": "EN-KO",  "status": "已审核"},
+    { "id": 7,  "source": "Quantum Computing",  "trans": "量子计算",  "domain": "物理学",   "langPair": "EN-ZH",  "status": "待审核"}
+]
