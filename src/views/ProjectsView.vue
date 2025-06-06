@@ -21,7 +21,7 @@ interface FileItem {
 // 设置点击事件
 const showSettings = () => {
   alert("你点击了上传文件按钮");
-  router.push('/file-manager')
+  router.push("/file-manager");
 };
 
 // 引入递归组件（需确认组件文件路径）
@@ -42,13 +42,13 @@ const processChildren = (children: FileItem["children"]): FileItem[] => {
 const fetchText = async () => {
   //if (isFetched.value) return // 添加缓存判断
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      ElMessage.error('请先登录');
-      router.push('/login');
+      ElMessage.error("请先登录");
+      router.push("/login");
       return;
     }
-    console.log('请求总督文件：',token);
+    console.log("请求总督文件：", token);
     // const config = {
     //   headers: {
     //     'token': token
@@ -57,11 +57,11 @@ const fetchText = async () => {
     const response2 = await fetch(
       "http://26.143.62.131:8080/file/project/projects",
       {
-        method: 'GET', // 指定请求方法
+        method: "GET", // 指定请求方法
         headers: {
-          'token': token || '', // 添加 token 头
-          'Content-Type': 'application/json' // 如果需要
-        }
+          token: token || "", // 添加 token 头
+          "Content-Type": "application/json", // 如果需要
+        },
       }
     );
     // 关键校验：状态码和内容类型
@@ -71,7 +71,7 @@ const fetchText = async () => {
       console.log("响应非 JSON 格式");
     }
     const jsonData = await response2.json();
-    console.log(jsonData)
+    console.log(jsonData);
 
     // 获取子文件
     const fetchChildren = async (projectId: string) => {
@@ -79,32 +79,32 @@ const fetchText = async () => {
         const response = await fetch(
           `http://26.143.62.131:8080/file/selectFiles?projectId=${projectId}`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'token': token,
-              'Content-Type': 'application/json'
-            }
+              token: token,
+              "Content-Type": "application/json",
+            },
           }
         );
-        
+
         if (!response.ok) {
           throw new Error(`获取子文件失败: ${response.status}`);
         }
-        
+
         const jsonData = await response.json();
-        console.log('文件：',jsonData.data)
+        console.log("文件：", jsonData.data);
         // 假设返回格式为 { data: [...] }
-        const returnData = jsonData.data.map((child:any) => ({
+        const returnData = jsonData.data.map((child: any) => ({
           id: child.id,
           name: child.fileName,
           isFolder: false,
-          children: [] // 初始为空
-        }))
-        console.log(returnData)
+          children: [], // 初始为空
+        }));
+        console.log(returnData);
         return returnData;
       } catch (error) {
-        console.error('获取子文件列表错误:', error);
-        ElMessage.error('加载文件列表失败');
+        console.error("获取子文件列表错误:", error);
+        ElMessage.error("加载文件列表失败");
         return [];
       }
     };
@@ -112,12 +112,12 @@ const fetchText = async () => {
     // 使用ref包裹整个响应数据
     staticFiles.value = await Promise.all(
       jsonData.data.map(async (item: FileItem) => ({
-      id: item.id,
-      name: item.name,
-      isFolder: true,
-      children: await fetchChildren(item.id),
-    })));
-
+        id: item.id,
+        name: item.name,
+        isFolder: true,
+        children: await fetchChildren(item.id),
+      }))
+    );
 
     console.log("请求json数据:", staticFiles.value);
     //isFetched.value = true
@@ -133,35 +133,19 @@ const onNodeUpdate = (updatedNode: FileItem) => {
   // } else {
   //   expandedNodes.value.delete(updatedNode.id);
   // }
-  staticFiles.value = (staticFiles.value ?? []).map((item: FileItem) =>
-    updateTreeItem(item, updatedNode)
-  );
+  staticFiles.value = updateTreeItem(staticFiles.value, updatedNode);
   console.log("更新后的:", staticFiles.value);
 };
 
-// 递归更新树节点（核心函数）
-const updateTreeItem = (node: FileItem, target: FileItem): FileItem => {
-  // console.log('当前节点:', node.id, '目标节点:', target.id);
-  if (node.id === target.id) {
-    // 创建新对象触发响应式更新
-    return {
-      ...node,
-      isOpen: target.isOpen, // 直接使用新状态
-      // 保留原有 children 的引用（避免重建整棵树）
-      children: node.children,
-      // children: node.children?.map(child => ({
-      //   ...child,
-      //   // 保持子节点原有状态（不强制继承父级展开状态）
-      // }))
-    };
-  }
-  if (node.children) {
-    return {
-      ...node,
-      children: node.children.map((child) => updateTreeItem(child, target)),
-    };
-  }
-  return node;
+// 单层结构更新函数（适用于非递归的扁平结构）
+const updateTreeItem = (list: FileItem[], target: FileItem): FileItem[] => {
+  return list.map((item) => {
+    if (item.id === target.id) {
+      // 创建新对象并合并所有属性
+      return { ...item, ...target };
+    }
+    return item;
+  });
 };
 
 const currentPath = ref(["示例", "树形文件"]); //根目录
@@ -194,11 +178,11 @@ watch(
 onMounted(fetchText);
 
 // 解决文件右键点击无响应
-import eventBus from '@/event-bus';
+import eventBus from "@/event-bus";
 
 onMounted(() => {
   // 监听事件总线事件
-  eventBus.on('node-contextmenu', (event: MouseEvent, node: FileItem) => {
+  eventBus.on("node-contextmenu", (event: MouseEvent, node: FileItem) => {
     handleNodeContextMenu(event, node);
   });
 });
@@ -223,7 +207,7 @@ const handleNodeContextMenu = (event: MouseEvent, node: FileItem) => {
   contextMenuX.value = event.clientX;
   contextMenuY.value = event.clientY;
   contextMenuData.value = node;
-  console.log('收到右键菜单事件:', node);
+  console.log("收到右键菜单事件:", node);
   // 显示右键菜单
   contextMenuVisible.value = true;
 };
@@ -235,46 +219,46 @@ const closeContextMenu = () => {
 
 // 新建文件相关状态
 const createFileModalVisible = ref(false);
-const newFileName = ref('新文件.txt');
+const newFileName = ref("新文件.txt");
 const currentParentNode = ref<FileItem | null>(null);
 // 打开新建文件模态框
 const openCreateFileModal = (parentNode: FileItem) => {
-  console.log('新文件')
+  console.log("新文件");
   currentParentNode.value = parentNode;
-  newFileName.value = '新文件.txt'; // 默认值
+  newFileName.value = "新文件.txt"; // 默认值
   createFileModalVisible.value = true;
   contextMenuVisible.value = false; // 关闭上下文菜单
 };
 // 确认创建文件
 const confirmCreateFile = () => {
   if (!currentParentNode.value) return;
-  
+
   const parentNode = currentParentNode.value;
   const fileName = newFileName.value.trim();
-  
+
   if (!fileName) {
     // 可以添加错误提示
     return;
   }
-  
+
   const newFile: FileItem = {
     id: `file_${Date.now()}`,
     name: fileName,
     isFolder: false,
-    content: ''
+    content: "",
   };
-  
+
   staticFiles.value = updateTreeWithNewItem(
     staticFiles.value,
     parentNode.id,
     newFile
   );
-  
+
   // 展开父文件夹
   if (!parentNode.isOpen) {
     const updatedParent: FileItem = {
       ...parentNode,
-      isOpen: true
+      isOpen: true,
     };
     onNodeUpdate(updatedParent);
   }
@@ -287,7 +271,7 @@ const confirmCreateFile = () => {
 const handleAddFile = () => {
   const parentNode = contextMenuData.value;
   if (!parentNode || !parentNode.isFolder) return;
-  console.log(parentNode.id)
+  console.log(parentNode.id);
   router.push({
     name: "file-manager",
     params: { fileId: parentNode.id },
@@ -300,13 +284,13 @@ const handleAddFile = () => {
   //   isFolder: false,
   //   content: ''
   // };
-  
+
   // staticFiles.value = updateTreeWithNewItem(
   //   staticFiles.value,
   //   parentNode.id,
   //   newFile
   // );
-  
+
   // // 展开父文件夹
   // if (!parentNode.isOpen) {
   //   const updatedParent: FileItem = {
@@ -326,20 +310,20 @@ const handleAddFile = () => {
 // const handleAddFolder = () => {
 //   const parentNode = contextMenuData.value;
 //   if (!parentNode || !parentNode.isFolder) return;
-  
+
 //   const newFolder: FileItem = {
 //     id: `folder_${Date.now()}`,
 //     name: '新文件夹',
 //     isFolder: true,
 //     children: []
 //   };
-  
+
 //   staticFiles.value = updateTreeWithNewItem(
 //     staticFiles.value,
 //     parentNode.id,
 //     newFolder
 //   );
-  
+
 //   // 展开父文件夹
 //   if (!parentNode.isOpen) {
 //     const updatedParent: FileItem = {
@@ -353,12 +337,12 @@ const handleAddFile = () => {
 import { ElMessage } from "element-plus";
 // 状态管理
 const createRootFolderVisible = ref(false);
-const newFolderName = ref('');
+const newFolderName = ref("");
 
 // 打开创建文件夹模态框
 const openCreateRootFolderModal = () => {
-  newFolderName.value = '';
-  console.log('新建文件夹');
+  newFolderName.value = "";
+  console.log("新建文件夹");
   createRootFolderVisible.value = true;
 };
 
@@ -367,13 +351,13 @@ const openCreateRootFolderModal = () => {
 //   createRootFolderVisible.value = false;
 //   done();
 // };
-import axios from 'axios';
+import axios from "axios";
 
 // 创建根文件夹
-const createRootFolder = async() => {
+const createRootFolder = async () => {
   const name = newFolderName.value.trim();
   if (!name) {
-    ElMessage.warning('请输入文件夹名称');
+    ElMessage.warning("请输入文件夹名称");
     return;
   }
   // 创建新文件夹对象
@@ -382,32 +366,33 @@ const createRootFolder = async() => {
     name,
     isFolder: true,
     isOpen: true,
-    children: []
+    children: [],
   };
-  
+
   // 添加到静态文件列表
   staticFiles.value = [...staticFiles.value, newFolder];
-  
+
   // 关闭模态框
   createRootFolderVisible.value = false;
   try {
     // 从 localStorage 获取 token
-    const token = localStorage.getItem('token');
-    console.log('token:',token);
+    const token = localStorage.getItem("token");
+    console.log("token:", token);
     // 如果没有 token，提示用户重新登录
     if (!token) {
-      ElMessage.error('请先登录');
-      router.push('/login');
+      ElMessage.error("请先登录");
+      router.push("/login");
       return;
     }
     // 设置请求头
     const config = {
       headers: {
-        'token': token
-      }
+        token: token,
+      },
     };
 
-    const response = await axios.post(`http://26.143.62.131:8080/file/project/insert?name=${name}`, 
+    const response = await axios.post(
+      `http://26.143.62.131:8080/file/project/insert?name=${name}`,
       {},
       // {
       // name: name,
@@ -416,57 +401,102 @@ const createRootFolder = async() => {
       config
     );
     // 提示成功
-    console.log('返回：',response.data.data)
+    console.log("返回：", response.data.data);
     newFolder.id = response.data.data;
-    console.log('文件夹：',newFolder);
+    console.log("文件夹：", newFolder);
     ElMessage.success(`文件夹 "${name}" 创建成功`);
     return response.data;
   } catch (error) {
-    console.log('创建文件夹失败:', error);
+    console.log("创建文件夹失败:", error);
     // 处理 token 过期或无效的情况
     if (error.response && error.response.status === 401) {
-      ElMessage.error('登录状态已过期，请重新登录');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      router.push('/login');
+      ElMessage.error("登录状态已过期，请重新登录");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
     }
     throw error;
   }
 };
 
-
 // 重命名
-const handleRename = () => {
+const handleRename = async () => {
   const node = contextMenuData.value;
-  console.log('node:',node)
+  console.log("node:", node);
   if (!node) return;
-  
-  const newName = prompt('请输入新名称:', node.name);
+
+  const projectId: number = node.id;
+  const newName = prompt("请输入新名称:", node.name);
   if (!newName || newName === node.name) return;
-  
+
   const updatedNode: FileItem = {
     ...node,
-    name: newName
+    name: newName,
   };
-  
-  staticFiles.value = updateTreeItem(
-    staticFiles.value,
-    updatedNode
-  );
+
+  try {
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem("token");
+    console.log("token:", token);
+    // 如果没有 token，提示用户重新登录
+    if (!token) {
+      ElMessage.error("请先登录");
+      router.push("/login");
+      return;
+    }
+    // 设置请求头
+    const config = {
+      headers: {
+        token: token,
+      },
+    };
+
+    const response = await axios.post(
+      `http://26.143.62.131:8080/file/project/update?projectId=${projectId}&name=${newName}`,
+      {},
+      config
+    );
+    console.log("项目重命名成功：", response.data);
+    staticFiles.value = updateTreeItem(staticFiles.value, updatedNode);
+    ElMessage.success(`项目 "${node.name}" 重命名为 "${newName}"`);
+  } catch (error) {
+    console.log("项目重命名失败：", error);
+  }
+  // 更新显示
 };
 
 // 删除
-const handleDelete = () => {
+const handleDelete = async () => {
   const node = contextMenuData.value;
   if (!node) return;
-  
+
   if (!confirm(`确定要删除 "${node.name}" 吗？`)) return;
-  
-  staticFiles.value = removeTreeNode(
-    staticFiles.value,
-    node.id
+
+  const projectId: number = node.id;
+  // 从 localStorage 获取 token
+  const token = localStorage.getItem("token");
+  console.log("token:", token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error("请先登录");
+    router.push("/login");
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      token: token,
+    },
+  };
+
+  const response = await axios.post(
+    `http://26.143.62.131:8080/file/project/delete?projectId=${projectId}`,
+    {},
+    config
   );
-  
+  console.log("项目删除成功：", response.data);
+  staticFiles.value = removeTreeNode(staticFiles.value, node.id);
+
   // 如果删除的是当前激活的文件，重置activeId
   if (activeId.value === node.id) {
     activeId.value = null;
@@ -474,18 +504,22 @@ const handleDelete = () => {
 };
 
 // 辅助函数：在树中添加新节点
-const updateTreeWithNewItem = (nodes: FileItem[], parentId: string, newItem: FileItem): FileItem[] => {
-  return nodes.map(node => {
+const updateTreeWithNewItem = (
+  nodes: FileItem[],
+  parentId: string,
+  newItem: FileItem
+): FileItem[] => {
+  return nodes.map((node) => {
     if (node.id === parentId) {
       return {
         ...node,
-        children: [...(node.children || []), newItem]
+        children: [...(node.children || []), newItem],
       };
     }
     if (node.children) {
       return {
         ...node,
-        children: updateTreeWithNewItem(node.children, parentId, newItem)
+        children: updateTreeWithNewItem(node.children, parentId, newItem),
       };
     }
     return node;
@@ -494,14 +528,14 @@ const updateTreeWithNewItem = (nodes: FileItem[], parentId: string, newItem: Fil
 
 // 辅助函数：从树中移除节点
 const removeTreeNode = (nodes: FileItem[], nodeId: string): FileItem[] => {
-  return nodes.filter(node => {
+  return nodes.filter((node) => {
     if (node.id === nodeId) {
       return false;
     }
     if (node.children) {
       return {
         ...node,
-        children: removeTreeNode(node.children, nodeId)
+        children: removeTreeNode(node.children, nodeId),
       };
     }
     return true;
@@ -509,10 +543,10 @@ const removeTreeNode = (nodes: FileItem[], nodeId: string): FileItem[] => {
 };
 
 // 点击其他区域关闭右键菜单
-document.addEventListener('click', closeContextMenu);
+document.addEventListener("click", closeContextMenu);
 // document.addEventListener('click', (event) => {
 //   if (!contextMenuVisible.value) return;
-  
+
 //   // 检查点击是否发生在右键菜单外部
 //   const contextMenuElement = document.querySelector('.context-menu');
 //   if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
@@ -530,7 +564,6 @@ document.addEventListener('click', closeContextMenu);
 </script>
 
 <template>
-  
   <!-- 2.左侧文件管理 -->
   <div class="file-manager1">
     <!-- 顶部路径导航 -->
@@ -550,7 +583,7 @@ document.addEventListener('click', closeContextMenu);
         :item="item"
         :active-id="activeId"
         @update-node="onNodeUpdate"
-        @node-click="handleNodeClick" 
+        @node-click="handleNodeClick"
         @node-contextmenu="handleNodeContextMenu" />
     </div>
 
@@ -570,11 +603,10 @@ document.addEventListener('click', closeContextMenu);
   </div>
 
   <!-- 创建根文件夹模态框 -->
-  <div 
-    v-if="createRootFolderVisible" 
+  <div
+    v-if="createRootFolderVisible"
     class="custom-modal-overlay"
-    @click.self="createRootFolderVisible = false"
-  >
+    @click.self="createRootFolderVisible = false">
     <div class="custom-modal">
       <div class="modal-header">
         <h3>创建文件夹</h3>
@@ -584,8 +616,7 @@ document.addEventListener('click', closeContextMenu);
         <input
           v-model="newFolderName"
           placeholder="请输入文件夹名称"
-          class="folder-input"
-        />
+          class="folder-input" />
       </div>
       <div class="modal-footer">
         <button @click="createRootFolderVisible = false">取消</button>
@@ -600,9 +631,8 @@ document.addEventListener('click', closeContextMenu);
     class="context-menu"
     :style="{
       left: `${contextMenuX}px`,
-      top: `${contextMenuY}px`
-    }"
-  >
+      top: `${contextMenuY}px`,
+    }">
     <ul>
       <li v-if="contextMenuData?.isFolder" @click="handleAddFile">
         <i class="fa fa-file-o mr-2"></i>新建文件
@@ -616,23 +646,27 @@ document.addEventListener('click', closeContextMenu);
     </ul>
   </div>
 
-   <!-- 创建文件模态框 -->
-  <div v-show="createFileModalVisible" class="modal-overlay" @click.self="createFileModalVisible = false">
+  <!-- 创建文件模态框 -->
+  <div
+    v-show="createFileModalVisible"
+    class="modal-overlay"
+    @click.self="createFileModalVisible = false">
     <div class="modal-content">
       <h3>新建文件</h3>
       <div class="modal-body">
         <div class="form-group">
           <label>文件名:</label>
-          <input 
-            type="text" 
-            v-model="newFileName" 
+          <input
+            type="text"
+            v-model="newFileName"
             class="form-control"
-            placeholder="请输入文件名"
-          />
+            placeholder="请输入文件名" />
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-cancel" @click="createFileModalVisible = false">取消</button>
+        <button class="btn btn-cancel" @click="createFileModalVisible = false">
+          取消
+        </button>
         <button class="btn btn-primary" @click="confirmCreateFile">创建</button>
       </div>
     </div>
