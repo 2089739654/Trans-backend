@@ -34,6 +34,12 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/file/**
+        - id: websocket
+          uri: ws://localhost:8083
+          predicates:
+            - Path=/socket/ws/**
+          filters:
+            - StripPrefix=1 # 去掉前缀
   main:
     web-application-type: reactive
   web:
