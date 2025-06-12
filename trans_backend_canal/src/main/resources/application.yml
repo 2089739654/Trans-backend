@@ -1,0 +1,12 @@
+server:
+  port: 8083
+canal:
+  enabled: true
+  hostname: 127.0.0.1
+  port: 11111
+  destination: example
+
+elasticsearch:
+  host: localhost
+  port: 9200
+  scheme: http
