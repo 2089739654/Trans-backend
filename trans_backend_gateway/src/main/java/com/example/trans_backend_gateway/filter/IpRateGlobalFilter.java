@@ -15,6 +15,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * IP限流过滤器
@@ -34,7 +35,7 @@ public class IpRateGlobalFilter implements Ordered, GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         //获取到调用客户端的IP地址
-        String ip = exchange.getRequest().getRemoteAddress().getHostName();
+        String ip = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostName();
         int[] rate = ipRateConfig.getByIp(ip);
         if(rate==null){
             rate=new int[]{10,100};

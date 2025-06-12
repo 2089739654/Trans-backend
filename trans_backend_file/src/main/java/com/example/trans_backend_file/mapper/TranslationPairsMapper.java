@@ -18,6 +18,8 @@ public interface TranslationPairsMapper extends BaseMapper<TranslationPairs> {
 
 
     Long getUserId(Long fileId);
+
+    List<TranslationPairs> selectAllById(List<Long> ids);
 }
 
 

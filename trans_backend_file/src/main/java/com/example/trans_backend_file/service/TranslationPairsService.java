@@ -20,4 +20,9 @@ public interface TranslationPairsService extends IService<TranslationPairs> {
     List<TranslationPairs> selectAllOrderByPosition(Long fileId);
 
     Long getUserId(Long id);
+
+    List<TranslationPairs> selectAllById(List<Long> ids);
+
+    Integer getTransTextCount(Long fileId);
+
 }

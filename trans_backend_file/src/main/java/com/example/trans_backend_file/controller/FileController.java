@@ -38,13 +38,16 @@ public class FileController {
         ThrowUtils.throwIf(fileId == null, ErrorCode.SYSTEM_ERROR, "上传失败");
         return ResultUtils.success(fileId);
     }
+
+
+    //todo 逻辑错误
     @GetMapping("/selectFiles")
-    public BaseResponse<List<File>> selectAllFiles(int projectId){
+    public BaseResponse<List<File>> selectAllFiles(Long projectId){
         List<File> files = fileService.selectAll(projectId);
         return ResultUtils.success(files);
     }
     @PostMapping("/deleteFile")
-    public BaseResponse<?>  deleteFile(@RequestBody  List<Integer> list){
+    public BaseResponse<?>  deleteFile(@RequestBody  List<Long> list){
         boolean b = fileService.deleteFiles(list);
         if(b){
             return ResultUtils.success(b);
@@ -53,18 +56,22 @@ public class FileController {
         }
     }
 
-    @RequestMapping("/test")
-    public String test(){
-        Map<String, GlobalExceptionHandler> beansOfType = applicationContext.getBeansOfType(GlobalExceptionHandler.class);
-        String[] beanNamesForType = applicationContext.getBeanNamesForType(GlobalExceptionHandler.class);
-        throw new BusinessException(ErrorCode.SYSTEM_ERROR,"测试"
-        );
+    @PostMapping("/renameFile")
+    public BaseResponse<?> renameFile(Long fileId, String newName) {
+        ThrowUtils.throwIf(fileId == null || newName == null || newName.isEmpty(), ErrorCode.PARAMS_ERROR, "fileId或newName不能为空");
+        fileService.renameFile(fileId, newName);
+        return ResultUtils.success(null);
     }
+
 
     @PostMapping("/export")
     public void export(Long fileId, HttpServletResponse response){
-
-
+        ThrowUtils.throwIf(fileId == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
+        try {
+            fileService.export(fileId, response);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "导出失败");
+        }
     }
 
 

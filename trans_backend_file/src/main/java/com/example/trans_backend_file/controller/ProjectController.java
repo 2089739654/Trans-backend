@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.LockSupport;
 
 @RestController
 @RequestMapping("/project")
@@ -36,6 +37,8 @@ public class ProjectController {
      */
     @GetMapping("/projects")
     public BaseResponse<List<Project>> allProjects(){
+        List<Project> projects = projectService.selectListById(BaseContext.getUser().getId());
+        ThrowUtils.throwIf(projects==null,ErrorCode.PARAMS_ERROR);
         return ResultUtils.success(projectService.selectListById(BaseContext.getUser().getId()));
     }
 
@@ -46,7 +49,7 @@ public class ProjectController {
      */
     @PostMapping("/insert")
     @ApiOperation(value = "创建成功返回项目ID，失败则返回errorcode")
-    public BaseResponse<?> createProject(@NotNull String name){
+    public BaseResponse<?> createProject( String name){
         Project project = projectService.create(BaseContext.getUser().getId(), name);
         if(project!=null){
             return ResultUtils.success(project.getId());

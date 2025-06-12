@@ -1,16 +1,22 @@
 package com.example.trans_backend_file.controller;
 
+import com.example.trans_backend_common.aop.ResourceCheck;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.common.ResultUtils;
 import com.example.trans_backend_common.enums.ResourceTypeEnum;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
-import com.example.trans_backend_file.aop.ResourceCheck;
 import com.example.trans_backend_file.manager.TranslationManager;
+import com.example.trans_backend_file.model.dto.GetTranslationHistoryRequest;
 import com.example.trans_backend_file.model.dto.SaveTransTextRequest;
+import com.example.trans_backend_file.model.dto.SearchTransTextRequest;
 import com.example.trans_backend_file.model.dto.SelectTransTextRequest;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
+import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
+import com.example.trans_backend_file.service.ElasticsearchService;
+import com.example.trans_backend_file.service.TranslationPairsHistoryService;
 import com.example.trans_backend_file.service.TranslationPairsService;
+import lombok.Getter;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,12 +29,30 @@ public class FileTranslationPairsController {
 
 
     @Resource
+    private ElasticsearchService elasticsearchService;
+
+    @Resource
     private TranslationPairsService translationPairsService;
+
+    @Resource
+    private TranslationPairsHistoryService translationPairsHistoryService;
 
     @Resource
     private TranslationManager translationManager;
 
+
+    @PostMapping("/getTransTextCount")
+    public BaseResponse<Integer> getTransTextCount(Long fileId){
+        ThrowUtils.throwIf(fileId == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
+        Integer count = translationPairsService.getTransTextCount(fileId);
+        ThrowUtils.throwIf(count == null, ErrorCode.SYSTEM_ERROR, "获取翻译文本数量失败");
+        return ResultUtils.success(count);
+    }
+
+
+
     @PostMapping("/getTransText")
+    @ResourceCheck(checkResource = "#selectTransTextRequest.fileId",resourceType = ResourceTypeEnum.FILE)
     public BaseResponse<List<TranslationPairs>> getTransText(@RequestBody SelectTransTextRequest selectTransTextRequest){
         ThrowUtils.throwIf(selectTransTextRequest == null, ErrorCode.PARAMS_ERROR);
         Long fileId = selectTransTextRequest.getFileId();
@@ -43,6 +67,7 @@ public class FileTranslationPairsController {
 
     @PostMapping("/saveTransText")
     public BaseResponse<String> saveTransText(@RequestBody SaveTransTextRequest saveTransTextRequest){
+        ThrowUtils.throwIf(saveTransTextRequest==null,ErrorCode.PARAMS_ERROR);
         translationPairsService.saveTransText(saveTransTextRequest.getList());
         return ResultUtils.success("更新成功");
     }
@@ -50,16 +75,28 @@ public class FileTranslationPairsController {
 
     @PostMapping("/translateText")
     public BaseResponse<String> translateText(String text){
+        //check text todo maybe
         String res = translationManager.translate(text);
         ThrowUtils.throwIf(res==null,ErrorCode.SYSTEM_ERROR,"翻译失败");
         return ResultUtils.success(res);
     }
 
-//    @PostMapping("/searchTransPairs")
-//    public BaseResponse<TranslationPairs> searchTransPairs(String text){
-//
-//    }
+    @PostMapping("/searchTransPairs")
+    public BaseResponse<List<TranslationPairs>> searchTransPairs(@RequestBody SearchTransTextRequest searchTransTextRequest){
+        ThrowUtils.throwIf(searchTransTextRequest==null, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(searchTransTextRequest.getFileId() == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
+        ThrowUtils.throwIf(searchTransTextRequest.getText() == null, ErrorCode.PARAMS_ERROR, "text不能为空");
+        List<TranslationPairs> search = elasticsearchService.search(searchTransTextRequest.getText(), searchTransTextRequest.getFileId());
+        return ResultUtils.success(search);
+    }
 
+    @PostMapping("/getTranslationHistory")
+    public BaseResponse<TranslationPairsHistory> getTranslationHistory(@RequestBody GetTranslationHistoryRequest getTranslationHistoryRequest){
+        ThrowUtils.throwIf(getTranslationHistoryRequest==null, ErrorCode.PARAMS_ERROR);
+        if(getTranslationHistoryRequest.getVersion()==0)return null;
+        TranslationPairsHistory res = translationPairsHistoryService.getByIdAndVersion(getTranslationHistoryRequest.getTransId(), getTranslationHistoryRequest.getVersion());
+        return ResultUtils.success(res);
+    }
 
 
 

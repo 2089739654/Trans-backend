@@ -24,7 +24,10 @@ public interface FileService extends IService<File> {
 
 
 
-    List<File> selectAll(int ProjectId);
+    List<File> selectAll(Long ProjectId);
 
-    boolean deleteFiles(List<Integer> ids);
+    boolean deleteFiles(List<Long> ids);
+
+    void renameFile(Long fileId, String newName);
+
 }

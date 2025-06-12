@@ -19,7 +19,6 @@ public class User {
      * 
      */
     @TableId(type = IdType.ASSIGN_ID)
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     /**

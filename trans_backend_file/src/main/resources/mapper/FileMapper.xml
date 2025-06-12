@@ -14,6 +14,10 @@
             <result property="updateTime" column="update_time" />
             <result property="isDeleted" column="is_deleted" />
     </resultMap>
+    <select id="selectAllByProjectId">
+        select * from file_project_record left join file on file.id = file_project_record.file_id
+                 where file_project_record.project_id = #{projectId}
+    </select>
 
 
 </mapper>

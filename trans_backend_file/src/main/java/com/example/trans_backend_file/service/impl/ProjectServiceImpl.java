@@ -1,5 +1,6 @@
 package com.example.trans_backend_file.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.trans_backend_common.context.BaseContext;
 import com.example.trans_backend_file.model.entity.Project;
@@ -24,7 +25,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Override
     public List<Project> selectListById(Long userId) {
-        return listByIds(Collections.singletonList(userId));
+        QueryWrapper<Project> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        List<Project> projects = baseMapper.selectList(queryWrapper);
+        return projects;
     }
 
     @Override
@@ -56,6 +60,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         if(project==null||!Objects.equals(project.getUserId(), BaseContext.getUser().getId())){
             return false;
         }
+        //todo 删除项目下的所有文件和翻译对
         return removeById(projectId);
     }
 

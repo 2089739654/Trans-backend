@@ -139,6 +139,7 @@ public class MinioUtil {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("文件删除失败! msg=" + e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件删除失败: " + e.getMessage());
         }
 
     }
@@ -205,11 +206,12 @@ public class MinioUtil {
 
     public static InputStream getFileStream(File file){
         //解析路径
-        String filePath = file.getFilePath();
-        int index = filePath.indexOf(minioUtil.bucketName) + minioUtil.bucketName.length();
-        String substring = filePath.substring(index+1);
+//        String filePath = file.getFilePath();
+        String fileName = file.getFileName();
+        Long userId = file.getUserId();
+        String filePath=userId+"/"+fileName;
         //获取文件流
-        InputStream inputStream = MinioUtil.get(substring);
+        InputStream inputStream = MinioUtil.get(filePath);
         ThrowUtils.throwIf(inputStream == null, ErrorCode.SYSTEM_ERROR, "获取文件流失败");
         return inputStream;
     }

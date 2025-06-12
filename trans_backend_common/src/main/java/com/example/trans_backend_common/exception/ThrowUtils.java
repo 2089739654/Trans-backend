@@ -35,5 +35,9 @@ public class ThrowUtils {
         throwIf(condition, new BusinessException(errorCode, message));
     }
 
+    public static void throwIf(boolean condition, ErrorCode errorCode, String message, Throwable cause) {
+        throwIf(condition, new BusinessException(message, cause, errorCode));
+    }
+
 
 }

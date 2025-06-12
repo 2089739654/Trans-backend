@@ -8,8 +8,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
+import com.example.trans_backend_file.mapper.TranslationPairsHistoryMapper;
 import com.example.trans_backend_file.mapper.TranslationPairsMapper;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
+import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
+import com.example.trans_backend_file.service.TranslationPairsHistoryService;
 import com.example.trans_backend_file.service.TranslationPairsService;
 import org.apache.ibatis.executor.BatchResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
 * @author 20897
@@ -28,6 +37,8 @@ import java.util.List;
 public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMapper, TranslationPairs>
     implements TranslationPairsService{
 
+    @Resource
+    private TranslationPairsHistoryService translationPairsHistoryService;
 
     @Resource
     private TranslationPairsMapper translationPairsMapper;
@@ -45,9 +56,33 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveTransText(List<TranslationPairs> list) {
-        boolean res = updateBatchById(list, 500);
-        ThrowUtils.throwIf(!res, ErrorCode.OPERATION_ERROR,"批量更新失败");
+        if(list==null|| list.isEmpty())return;
+        List<Long> idList = list.stream().map(TranslationPairs::getId).collect(Collectors.toList());
+        List<TranslationPairs> translationPairs = selectAllById(idList);
+        List<TranslationPairs> res=new ArrayList<>();
+        List<TranslationPairsHistory> translationPairsHistoryList=new ArrayList<>();
+        //旧数据
+        Map<Long, TranslationPairs> map = translationPairs.stream().collect(Collectors.toMap(TranslationPairs::getId, translationPairs1 -> {return translationPairs1;}));
+        //是否发生修改
+        for (TranslationPairs val:list){
+            TranslationPairs oldVal = map.get(val.getId());
+            ThrowUtils.throwIf(oldVal == null, ErrorCode.PARAMS_ERROR, "TranslationPairs with id " + val.getId() + " does not exist");
+            //如果发生修改则进行更新
+            if(!val.getTranslatedText().equals(oldVal.getTranslatedText())){
+                val.setVersion(oldVal.getVersion()+1);
+                res.add(val);
+                TranslationPairsHistory translationPairsHistory=new TranslationPairsHistory();
+                translationPairsHistory.setTranslatedText(oldVal.getTranslatedText());
+                translationPairsHistory.setTransId(val.getId());
+                translationPairsHistory.setVersion(oldVal.getVersion());
+                translationPairsHistoryList.add(translationPairsHistory);
+            }
+        }
+        boolean res1 = updateBatchById(res, 500);
+        boolean res2 = translationPairsHistoryService.saveBatch(translationPairsHistoryList, 500);
+        ThrowUtils.throwIf(!res1||!res2, ErrorCode.OPERATION_ERROR,"批量更新失败");
     }
 
     @Override
@@ -61,6 +96,19 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
     @Override
     public Long getUserId(Long id) {
         return translationPairsMapper.getUserId(id);
+    }
+
+    @Override
+    public List<TranslationPairs> selectAllById(List<Long> ids) {
+        return translationPairsMapper.selectAllById(ids);
+    }
+
+    @Override
+    public Integer getTransTextCount(Long fileId) {
+        QueryWrapper<TranslationPairs> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("file_id", fileId);
+        long count = baseMapper.selectCount(queryWrapper);
+        return (int)count;
     }
 
 

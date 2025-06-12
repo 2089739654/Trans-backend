@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -33,9 +34,13 @@ public class JsonTransformConfig {
 //    }
 
 
-//    @Bean
-//    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-//        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter=new MappingJackson2HttpMessageConverter(objectMapper);
-//        return mappingJackson2HttpMessageConverter;
-//    }
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        module.addSerializer(long.class, ToStringSerializer.instance);
+        mapper.registerModule(module);
+        return mapper;
+    }
 }

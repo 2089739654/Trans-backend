@@ -22,6 +22,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -36,7 +37,7 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
     @Resource
     RestHighLevelClient restHighLevelClient;
 
-    private final String INDEX_NAME = "translation_pairs";
+    private final String INDEX_NAME = "trans_pairs";
 
 
     @Override
@@ -91,26 +92,7 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
     @Override
     public List<TranslationPairs> search(String text, Long fileId) {
 
-        SearchRequest searchRequest=new SearchRequest(INDEX_NAME);
-        SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
-
-        BoolQueryBuilder boolQueryBuilder=new BoolQueryBuilder();
-
-        MatchQueryBuilder matchQueryBuilder=new MatchQueryBuilder("sourceText",text);
-        matchQueryBuilder.minimumShouldMatch("80%");
-
-        MatchQueryBuilder matchQueryBuilder1=new MatchQueryBuilder("fileId",fileId);
-        boolQueryBuilder.must(matchQueryBuilder);
-        boolQueryBuilder.must(matchQueryBuilder1);
-
-        MatchPhraseQueryBuilder matchPhraseQueryBuilder=new MatchPhraseQueryBuilder("sourceText",text);
-        matchPhraseQueryBuilder.slop(2);
-        boolQueryBuilder.should(matchPhraseQueryBuilder);
-
-        searchSourceBuilder.query(boolQueryBuilder);
-        searchSourceBuilder.size(2);
-
-        searchRequest.source(searchSourceBuilder);
+        SearchRequest searchRequest = getSearchRequest(text, fileId);
         List<TranslationPairs> list=new ArrayList<>();
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -127,6 +109,30 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"es搜索失败");
         }
         return list;
+    }
+
+    private SearchRequest getSearchRequest(String text, Long fileId) {
+        SearchRequest searchRequest=new SearchRequest(INDEX_NAME);
+        SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
+
+        BoolQueryBuilder boolQueryBuilder=new BoolQueryBuilder();
+
+        MatchQueryBuilder matchQueryBuilder=new MatchQueryBuilder("sourceText", text);
+        matchQueryBuilder.minimumShouldMatch("80%");
+
+        MatchQueryBuilder matchQueryBuilder1=new MatchQueryBuilder("fileId", fileId);
+        boolQueryBuilder.must(matchQueryBuilder);
+        boolQueryBuilder.must(matchQueryBuilder1);
+
+        MatchPhraseQueryBuilder matchPhraseQueryBuilder=new MatchPhraseQueryBuilder("sourceText", text);
+        matchPhraseQueryBuilder.slop(2);
+        boolQueryBuilder.should(matchPhraseQueryBuilder);
+
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.size(2);
+
+        searchRequest.source(searchSourceBuilder);
+        return searchRequest;
     }
 
 

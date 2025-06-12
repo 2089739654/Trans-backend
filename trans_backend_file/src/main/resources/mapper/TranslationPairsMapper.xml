@@ -23,4 +23,11 @@
     <select id="getUserId" resultType="java.lang.Long">
         select file.user_id from translation_pairs left join file on translation_pairs.file_id = file.id where translation_pairs.id = #{id}
     </select>
+    <select id="selectAllById" resultType="com.example.trans_backend_file.model.entity.TranslationPairs">
+        select id,translated_text,version from translation_pairs where id in
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        for update
+    </select>
 </mapper>
