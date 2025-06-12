@@ -26,6 +26,9 @@ public class UserController {
     private UserService userService;
 
 
+    //todo 修改用户信息
+    //todo 考虑由于用户编辑个人信息导致token(redis)的数据不一致问题
+
     @PostMapping("/register")
     public BaseResponse<User> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         ThrowUtils.throwIf(userRegisterRequest == null, ErrorCode.PARAMS_ERROR);
