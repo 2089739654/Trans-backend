@@ -15,6 +15,7 @@
         <module>trans_backend_common</module>
         <module>trans_backend_file</module>
         <module>trans_backend_canal</module>
+        <module>trans_backend_socket</module>
     </modules>
 
     <properties>
