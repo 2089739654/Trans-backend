@@ -2,3 +2,10 @@
 target/
 build/
 *.class
+
+application-local.yml
+
+.idea/
+**/*Test.java
+
+user.txt
