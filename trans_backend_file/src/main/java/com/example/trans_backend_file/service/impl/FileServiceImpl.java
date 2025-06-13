@@ -253,7 +253,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
         }
         UpdateWrapper<File> updateWrapper=new UpdateWrapper<>();
         updateWrapper.eq("id",fileId);
-        updateWrapper.set("name",newName);
+        updateWrapper.set("file_name",newName);
         int update = baseMapper.update(null, updateWrapper);
         ThrowUtils.throwIf(update != 1, ErrorCode.SYSTEM_ERROR, "重命名失败");
     }

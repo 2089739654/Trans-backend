@@ -4,3 +4,6 @@ build/
 *.class
 
 application-local.yml
+
+user.txt
+**/*Test.java

@@ -7,10 +7,7 @@ import com.example.trans_backend_common.enums.ResourceTypeEnum;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.manager.TranslationManager;
-import com.example.trans_backend_file.model.dto.GetTranslationHistoryRequest;
-import com.example.trans_backend_file.model.dto.SaveTransTextRequest;
-import com.example.trans_backend_file.model.dto.SearchTransTextRequest;
-import com.example.trans_backend_file.model.dto.SelectTransTextRequest;
+import com.example.trans_backend_file.model.dto.*;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
 import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
 import com.example.trans_backend_file.service.ElasticsearchService;
@@ -74,9 +71,10 @@ public class FileTranslationPairsController {
 
 
     @PostMapping("/translateText")
-    public BaseResponse<String> translateText(String text){
+    @ResourceCheck(checkResource = "#translateRequest.fileId", resourceType = ResourceTypeEnum.FILE)
+    public BaseResponse<String> translateText(@RequestBody TranslateRequest translateRequest){
         //check text todo maybe
-        String res = translationManager.translate(text);
+        String res = translationManager.translate(translateRequest.getSourceText());
         ThrowUtils.throwIf(res==null,ErrorCode.SYSTEM_ERROR,"翻译失败");
         return ResultUtils.success(res);
     }
