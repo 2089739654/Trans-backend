@@ -70,7 +70,11 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
             TranslationPairs oldVal = map.get(val.getId());
             ThrowUtils.throwIf(oldVal == null, ErrorCode.PARAMS_ERROR, "TranslationPairs with id " + val.getId() + " does not exist");
             //如果发生修改则进行更新
-            if(!val.getTranslatedText().equals(oldVal.getTranslatedText())){
+            if(val.getTranslatedText()==null&&oldVal.getTranslatedText()==null){
+                //如果都没有翻译文本则不进行更新
+                continue;
+            }
+            if(val.getTranslatedText()==null||!val.getTranslatedText().equals(oldVal.getTranslatedText())){
                 val.setVersion(oldVal.getVersion()+1);
                 res.add(val);
                 TranslationPairsHistory translationPairsHistory=new TranslationPairsHistory();
@@ -80,7 +84,8 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
                 translationPairsHistoryList.add(translationPairsHistory);
             }
         }
-        boolean res1 = updateBatchById(res, 500);
+        if(res.isEmpty())return;
+        boolean res1 = updateBatchById(res, 100);
         boolean res2 = translationPairsHistoryService.saveBatch(translationPairsHistoryList, 500);
         ThrowUtils.throwIf(!res1||!res2, ErrorCode.OPERATION_ERROR,"批量更新失败");
     }

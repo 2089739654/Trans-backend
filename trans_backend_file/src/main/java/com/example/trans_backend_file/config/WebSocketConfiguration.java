@@ -22,7 +22,7 @@ public class WebSocketConfiguration {
     @Bean
     public RedissonClient redisson() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://192.168.21.3:6379");//单节点模式
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");//单节点模式
         return Redisson.create(config);
     }
 }

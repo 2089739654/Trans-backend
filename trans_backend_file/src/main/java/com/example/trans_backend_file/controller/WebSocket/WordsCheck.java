@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * WebSocket服务
  */
-@Component
+//@Component
 @ServerEndpoint(value = "/ws/{sid}", configurator = SpringBeanServerEndpointConfigurator.class)
 public class WordsCheck {
     @Resource
