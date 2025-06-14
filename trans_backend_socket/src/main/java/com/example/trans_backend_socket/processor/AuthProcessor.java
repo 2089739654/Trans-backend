@@ -2,7 +2,7 @@ package com.example.trans_backend_socket.processor;
 
 import cn.hutool.json.JSONUtil;
 import com.example.trans_backend_common.entity.User;
-import com.example.trans_backend_socket.entity.WebSocketSessionContext;
+import com.example.trans_backend_socket.context.WebSocketSessionContext;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Objects;
