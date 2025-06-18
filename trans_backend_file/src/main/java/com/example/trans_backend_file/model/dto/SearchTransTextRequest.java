@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SearchTransTextRequest {
 
-    private Long fileId;
+    private Long transId;
 
     private String text;
 

@@ -52,7 +52,7 @@ public class FileController {
         if(b){
             return ResultUtils.success(b);
         }else{
-            return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
         }
     }
 

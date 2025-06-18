@@ -13,6 +13,6 @@ public interface ElasticsearchService {
 
     void update(TranslationPairs translationPairs);
 
-    List<TranslationPairs> search(String text, Long fileId);
+    List<TranslationPairs> search(String text, List<Long> fileId);
 
 }

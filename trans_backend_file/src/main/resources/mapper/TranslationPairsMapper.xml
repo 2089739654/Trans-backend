@@ -30,4 +30,16 @@
         </foreach>
         for update
     </select>
+    <select id="selectAllByUserId" resultType="com.example.trans_backend_file.model.vo.SelectTransPairsVo">
+        SELECT
+            translation_pairs.id,
+            translation_pairs.file_id,
+            tmp.file_name,
+            translation_pairs.source_text,
+            translation_pairs.translated_text
+        FROM
+            translation_pairs
+                JOIN ( SELECT id, file_name FROM `file` WHERE user_id = #{id} ) AS tmp ON tmp.id = translation_pairs.file_id
+        WHERE translation_pairs.translated_text is NOT NULL
+    </select>
 </mapper>

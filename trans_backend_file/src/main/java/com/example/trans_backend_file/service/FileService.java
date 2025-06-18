@@ -30,4 +30,6 @@ public interface FileService extends IService<File> {
 
     void renameFile(Long fileId, String newName);
 
+    List<File> selectByUserId(Long userId);
+
 }

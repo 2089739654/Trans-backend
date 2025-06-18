@@ -3,6 +3,7 @@ package com.example.trans_backend_file.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
+import com.example.trans_backend_file.model.vo.SelectTransPairsVo;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public interface TranslationPairsMapper extends BaseMapper<TranslationPairs> {
     Long getUserId(Long fileId);
 
     List<TranslationPairs> selectAllById(List<Long> ids);
+
+
+    List<SelectTransPairsVo> selectAllByUserId(Long id);
 }
 
 

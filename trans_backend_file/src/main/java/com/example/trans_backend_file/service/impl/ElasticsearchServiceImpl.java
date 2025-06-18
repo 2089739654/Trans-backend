@@ -16,9 +16,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +89,7 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
     }
 
     @Override
-    public List<TranslationPairs> search(String text, Long fileId) {
+    public List<TranslationPairs> search(String text, List<Long> fileId) {
 
         SearchRequest searchRequest = getSearchRequest(text, fileId);
         List<TranslationPairs> list=new ArrayList<>();
@@ -111,7 +110,7 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
         return list;
     }
 
-    private SearchRequest getSearchRequest(String text, Long fileId) {
+    private SearchRequest getSearchRequest(String text, List<Long> fileId) {
         SearchRequest searchRequest=new SearchRequest(INDEX_NAME);
         SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
 
@@ -120,16 +119,23 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
         MatchQueryBuilder matchQueryBuilder=new MatchQueryBuilder("sourceText", text);
         matchQueryBuilder.minimumShouldMatch("80%");
 
-        MatchQueryBuilder matchQueryBuilder1=new MatchQueryBuilder("fileId", fileId);
+//        MatchQueryBuilder matchQueryBuilder1=new MatchQueryBuilder("fileId", fileId);
+
+        TermsQueryBuilder termsQueryBuilder=new TermsQueryBuilder("fileId", fileId);
+
+        TermQueryBuilder termQueryBuilder=new TermQueryBuilder("isNew", true);
+
         boolQueryBuilder.must(matchQueryBuilder);
-        boolQueryBuilder.must(matchQueryBuilder1);
+        boolQueryBuilder.filter(termsQueryBuilder);
+        boolQueryBuilder.filter(termQueryBuilder);
 
         MatchPhraseQueryBuilder matchPhraseQueryBuilder=new MatchPhraseQueryBuilder("sourceText", text);
         matchPhraseQueryBuilder.slop(2);
+
         boolQueryBuilder.should(matchPhraseQueryBuilder);
 
         searchSourceBuilder.query(boolQueryBuilder);
-        searchSourceBuilder.size(2);
+        searchSourceBuilder.size(3);
 
         searchRequest.source(searchSourceBuilder);
         return searchRequest;

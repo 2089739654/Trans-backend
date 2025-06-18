@@ -3,6 +3,7 @@ package com.example.trans_backend_file.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
+import com.example.trans_backend_file.model.vo.SelectTransPairsVo;
 
 import java.util.List;
 
@@ -24,5 +25,9 @@ public interface TranslationPairsService extends IService<TranslationPairs> {
     List<TranslationPairs> selectAllById(List<Long> ids);
 
     Integer getTransTextCount(Long fileId);
+
+    List<SelectTransPairsVo> getTransPairsByUserId(Long id);
+
+    void removeTransPairs(Long transId);
 
 }

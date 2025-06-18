@@ -3,23 +3,30 @@ package com.example.trans_backend_file.controller;
 import com.example.trans_backend_common.aop.ResourceCheck;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.common.ResultUtils;
+import com.example.trans_backend_common.context.BaseContext;
 import com.example.trans_backend_common.enums.ResourceTypeEnum;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.manager.TranslationManager;
 import com.example.trans_backend_file.model.dto.*;
+import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
 import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
+import com.example.trans_backend_file.model.vo.SelectTransPairsVo;
 import com.example.trans_backend_file.service.ElasticsearchService;
+import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.service.TranslationPairsHistoryService;
 import com.example.trans_backend_file.service.TranslationPairsService;
 import lombok.Getter;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class FileTranslationPairsController {
@@ -36,6 +43,10 @@ public class FileTranslationPairsController {
 
     @Resource
     private TranslationManager translationManager;
+
+    @Resource
+    @Lazy
+    private FileService fileService;
 
 
     @PostMapping("/getTransTextCount")
@@ -82,10 +93,13 @@ public class FileTranslationPairsController {
     @PostMapping("/searchTransPairs")
     public BaseResponse<List<TranslationPairs>> searchTransPairs(@RequestBody SearchTransTextRequest searchTransTextRequest){
         ThrowUtils.throwIf(searchTransTextRequest==null, ErrorCode.PARAMS_ERROR);
-        ThrowUtils.throwIf(searchTransTextRequest.getFileId() == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
         ThrowUtils.throwIf(searchTransTextRequest.getText() == null, ErrorCode.PARAMS_ERROR, "text不能为空");
-        List<TranslationPairs> search = elasticsearchService.search(searchTransTextRequest.getText(), searchTransTextRequest.getFileId());
-        return ResultUtils.success(search);
+        List<File> files = fileService.selectByUserId(BaseContext.getUser().getId());
+        List<Long> list = files.stream().map(File::getId).collect(Collectors.toList());
+        List<TranslationPairs> search = elasticsearchService.search(searchTransTextRequest.getText(), list);
+        Long transId = searchTransTextRequest.getTransId();
+        List<TranslationPairs> collect = search.stream().filter(e -> !(e.getId()).equals(transId)).collect(Collectors.toList());
+        return ResultUtils.success(collect);
     }
 
     @PostMapping("/getTranslationHistory")
@@ -96,6 +110,21 @@ public class FileTranslationPairsController {
         return ResultUtils.success(res);
     }
 
+    @PostMapping ("/getTransPairs")
+    public BaseResponse<List<SelectTransPairsVo>> getTransPairs(){
+        Long id = BaseContext.getUser().getId();
+        List<SelectTransPairsVo> list = translationPairsService.getTransPairsByUserId(id);
+        ThrowUtils.throwIf(list == null, ErrorCode.SYSTEM_ERROR, "获取翻译对失败");
+        return ResultUtils.success(list);
+    }
+
+
+    @PostMapping("/removeTransPairs")
+    public void removeTransPairs(Long transId){
+        ThrowUtils.throwIf(transId == null, ErrorCode.PARAMS_ERROR, "transId不能为空");
+        translationPairsService.removeTransPairs(transId);
+
+    }
 
 
 }

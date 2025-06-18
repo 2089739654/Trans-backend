@@ -18,13 +18,13 @@ import java.util.Random;
 public class BaiduConnectionFactory extends AbstractConnectionFactory{
 
     @Value("${baidu.appId}")
-    private static String APP_ID;
+    private String APP_ID;
 
 
     @Value("${baidu.secretKey}")
-    private static String SECRET_KEY;
+    private String SECRET_KEY;
 
-    private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
+    private final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
 
     private final PoolingHttpClientConnectionManager httpClientConnectionManager = new PoolingHttpClientConnectionManager();
 

@@ -1,17 +1,22 @@
 package com.example.trans_backend_file.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.trans_backend_common.common.BaseResponse;
+import com.example.trans_backend_common.context.BaseContext;
 import com.example.trans_backend_common.exception.ErrorCode;
 import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.mapper.TranslationPairsHistoryMapper;
 import com.example.trans_backend_file.mapper.TranslationPairsMapper;
+import com.example.trans_backend_file.model.entity.File;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
 import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
+import com.example.trans_backend_file.model.vo.SelectTransPairsVo;
+import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.service.TranslationPairsHistoryService;
 import com.example.trans_backend_file.service.TranslationPairsService;
 import org.apache.ibatis.executor.BatchResult;
@@ -36,6 +41,9 @@ import java.util.stream.Collectors;
 @Service
 public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMapper, TranslationPairs>
     implements TranslationPairsService{
+
+    @Resource
+    private FileService fileService;
 
     @Resource
     private TranslationPairsHistoryService translationPairsHistoryService;
@@ -114,6 +122,20 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
         queryWrapper.eq("file_id", fileId);
         long count = baseMapper.selectCount(queryWrapper);
         return (int)count;
+    }
+
+    @Override
+    public List<SelectTransPairsVo> getTransPairsByUserId(Long id) {
+        return translationPairsMapper.selectAllByUserId(id);
+    }
+
+    @Override
+    public void removeTransPairs(Long transId) {
+        UpdateWrapper<TranslationPairs> updateWrapper=new UpdateWrapper<>();
+        updateWrapper.set("is_new",0);
+        updateWrapper.eq("id",transId);
+        int update = baseMapper.update(null, updateWrapper);
+        ThrowUtils.throwIf(update == 0, ErrorCode.OPERATION_ERROR, "删除翻译对失败");
     }
 
 

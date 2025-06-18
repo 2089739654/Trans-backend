@@ -77,6 +77,7 @@ public class CanalClient implements InitializingBean {
     //线程池处理   有待商榷 todo
     //异步ack   todo
 
+    //索引结构 不停机重构 todo
     @Override
     public void afterPropertiesSet() throws Exception {
         // 创建链接

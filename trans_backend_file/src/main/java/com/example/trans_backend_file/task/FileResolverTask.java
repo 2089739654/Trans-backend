@@ -42,6 +42,9 @@ public class FileResolverTask implements CommandLineRunner, DisposableBean {
         }).build());
     }
 
+    //动态线程池  todo
+
+
     @Override
     public void run(String... args) throws Exception {
 
