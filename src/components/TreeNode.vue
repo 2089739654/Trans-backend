@@ -63,27 +63,6 @@
     (e: 'node-contextmenu', event: MouseEvent, node: TreeNode): void;
   }>();
 
-// 处理文件夹点击（展开/折叠）
-// const handleFolderClick = (event: MouseEvent) => {
-//   event.stopPropagation(); // 阻止冒泡到节点点击
-//   console.log('文件夹')
-//   if (props.item.isFolder) {
-//     const updatedNode: TreeNode = {
-//       ...props.item,
-//       isOpen: !props.item.isOpen
-//     };
-    
-//     emit('update-node', updatedNode);
-//   }
-// };
-
-// // 处理节点点击（选中文件）
-// const handleNodeClick = () => {
-//   console.log('文件')
-//   if (!props.item.isFolder) {
-//     emit('node-click', props.item);
-//   }
-// };
 // 处理节点点击（统一处理文件夹和文件点击）
 const handleClick = (event: MouseEvent) => {
   if (props.item.isFolder) {

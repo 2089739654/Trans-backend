@@ -138,7 +138,7 @@ const validateFileSize = (file: File) => {
 const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
   const formData = new FormData()
   // 添加ID字段
-  formData.append('id', id.toString()); // 确保ID是字符串类型
+  formData.append('projectId', id.toString()); // 确保ID是字符串类型
   // 添加文件
   filesToUpload.forEach(file => {
     formData.append('file', file)
@@ -168,9 +168,8 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
 
   try {
     const response = await axios.post('http://26.143.62.131:8080/file/upload', 
-    formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      config,
+    formData, config,{
+      headers: { 'Content-Type': 'multipart/form-data' },  
       onUploadProgress: progressEvent => {
         const progress = Math.round(
           (progressEvent.loaded * 100) / (progressEvent.total || 1)
@@ -181,12 +180,14 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
       }
     })
     console.log('返回结果：',response)
-    emit('upload-success', response.data)
-    // 测试
-    router.push({
-      name: "content",
-      params: { fileId: response.id },
-    });
+    
+    emit('upload-success', response)
+    // 设置延迟跳转
+    console.log("你好")
+    if(response.status==200){
+      ElMessage.success("上传成功！");
+    }
+    router.push('/projects');
   } catch (error) {
     handleUploadError(error, filesToUpload)
     emit('upload-error', error)

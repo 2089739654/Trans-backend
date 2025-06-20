@@ -1,38 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-//import { ElTableV2 } from 'element-plus'
-//import { computed } from 'vue'
-//import { useRoute } from 'vue-router'
-//const route = useRoute()
-//const pageTitle = computed(() => route.meta.title || '默认标题')// 动态获取标题
-
-//111111
-// 引入递归组件（需确认组件文件路径）
-// import TreeNode from '@/components/TreeNode.vue';
-// const staticFiles = ref([
-//   {
-//     name: '领域分类',
-//     id: 'folder_'+ crypto.randomUUID(),
-//     isFolder: true,
-//     children: [
-//         { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '法律' },
-//         { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '医疗' },
-//         { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '技术' }
-//     ]
-//   },
-// ])
-// const currentPath = ref(['多库切换', '术语库'])//根目录
-// const activeId = ref(null) // 统一管理激活状态
-// const handleNodeClick = (item) => {
-//   // 每次点击新节点时重置激活状态
-//   activeId.value = activeId.value === item.id ? null : item.id
-//   console.log('点击节点:', item)
-//   // 可通过item.id进行精确操作
-// }
+import { ref } from "vue";
 
 //2222222222
 // 表格数据
-
 import { type Terms } from "../types/terms";
 
 // 表单数据类型
@@ -49,7 +19,7 @@ const fetchText = async () => {
   try {
     const response2 = await fetch("/mock/terms.json");
     // 关键校验：状态码和内容类型
-    if (!response2.ok) console.log(`HTTP错误: ${response2.status}`);
+    //if (!response2.ok) console.log(`HTTP错误: ${response2.status}`);
     const contentType = response2.headers.get("Content-Type");
     if (!contentType?.includes("application/json")) {
       console.log("响应非 JSON 格式");
@@ -62,7 +32,6 @@ const fetchText = async () => {
       trans: item.trans,
       domain: item.domain,
       langPair: item.langPair,
-      status: item.status,
     }));
     console.log("请求json数据:", tableData.value);
   } catch (error) {
@@ -96,7 +65,7 @@ const formData = ref<FormData>({
 const dialogVisible = ref(false);
 // 是否为编辑模式
 const isEditMode = computed(() => !!formData.value.id); 
-const formRef = ref<FormInstance>();
+const formRef = ref<FormData>();
 // 表单验证规则
 const rules = {
   source: [
@@ -120,16 +89,8 @@ const closeDialog = () => {
 };
 // 提交逻辑
 const submitForm = async () => {
-  await formRef.value?.validate((valid) => {
-    // if (!valid) return;
-    // const newId = tableData.value.length + 1;
-    // tableData.value.unshift({
-    //   id: newId,
-    //   ...formData,
-    //   status: "待审核", // 新增记录默认状态
-    // });
-    // 模拟接口请求（需替换为实际API）
-    // const requestData = formData.value;
+  const isValid = await formRef.value?.validate();
+  if (isValid) {
     console.log()
     if (isEditMode.value) {
       // 编辑逻辑
@@ -143,7 +104,7 @@ const submitForm = async () => {
     
     dialogVisible.value = false;
     formData.value = { ...defaultFormData }; // 重置表单
-  });
+  };
 };
 // 默认表单数据
 const defaultFormData: FormData = {
@@ -181,7 +142,7 @@ const handleBatchDelete = () => {
     customClass: "custom-messagebox", // 自定义类名
   }).then(() => {
     tableData.value = tableData.value.filter(
-      (item) => !selectedRows.value.includes(item.id)
+      (item:any) => !selectedRows.value.includes(item.id)
     );
     ElMessage.success({
       message: `已删除 ${selectedRows.value.length} 条术语`,
@@ -329,13 +290,6 @@ const showSettings = () => {
       <el-table-column prop="trans" label="翻译结果" min-width="100" />
       <el-table-column prop="domain" label="领域" width="120" />
       <el-table-column prop="langPair" label="语言对" width="100" />
-      <el-table-column prop="status" label="术语状态" width="120">
-        <template #default="{ row }">
-          <el-tag :type="row.status === '已审核' ? 'success' : 'warning'">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="操作" width="160">
         <template #default="{ row }">
           <el-button size="small" @click="handleEdit(row)">编辑</el-button>

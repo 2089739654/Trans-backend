@@ -1,119 +1,88 @@
 <script setup lang="ts">
 import { ref } from "vue";
-// import { computed } from 'vue'
-// import { useRoute } from 'vue-router'
-// const route = useRoute()
-// const pageTitle = computed(() => route.meta.title || '默认标题')// 动态获取标题
+import { useRouter } from "vue-router";
+const router = useRouter();
 
-//111111
-// 引入递归组件（需确认组件文件路径）
-// import TreeNode from '@/components/TreeNode.vue';
-// const staticFiles = ref([
-//     {
-//       name: '记忆库1',
-//       id: 'folder_'+ crypto.randomUUID(),
-//       isFolder: true,
-//       children: [
-//           { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '记忆库1.1' },
-//           { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '记忆库1.2' }
-//       ]
-//     },
-//     {
-//       name: '记忆库2',
-//       id: 'folder_'+ crypto.randomUUID(),
-//       isFolder: true,
-//       children: [
-//           { id: 'file_'+ Math.random().toString(36).substr(2, 9),name: '记忆库2.1' }
-//       ]
-//     }
-// ])
-// const currentPath = ref(['示例', '记忆库列表'])//根目录
-// const activeId = ref(null) // 统一管理激活状态
-// const handleNodeClick = (item) => {
-//   // 每次点击新节点时重置激活状态
-//   activeId.value = activeId.value === item.id ? null : item.id
-//   console.log('点击节点:', item)
-//   // 可通过item.id进行精确操作
-// }
-
-//   // 递归处理函数（独立封装）
-//   const processChildren = (children) => {
-//   return children.map(child => ({
-//     id: child.id,
-//     name: child.name,
-//     isOpen: false, // 新增展开状态字段（默认折叠）
-//     isFolder: child.isFolder || false, // 默认非文件夹
-//     children: child.children ? processChildren(child.children) : [] // 递归关键点
-//   }));
-// };
-//   // 父组件新增事件处理
-//   const onNodeUpdate = (updatedNode) => {
-//   staticFiles.value = staticFiles.value.map(item =>
-//     updateTreeItem(item, updatedNode)
-//   );
-// };
-
-// // 递归更新树节点（核心函数）
-// const updateTreeItem = (node, target) => {
-//   if (node.id === target.id) return target;
-//   if (node.children) {
-//     return {
-//       ...node,
-//       children: node.children.map(child =>
-//         updateTreeItem(child, target)
-//       )
-//     };
-//   }
-//   return node;
-// };
+import axios from 'axios'
+import { ElMessage, ElMessageBox } from "element-plus";
 
 //222222222222
-// 表格数据
 
-import { type MemoryEntry } from "../types/memories";
+// 表单数据类型
+interface MemoryFormData {
+  source: string;
+  trans: string;
+  fileId: string;
+  fileName: string;
+  createTime?: string;
+  lastTime?: string;
+  id?: number; // 编辑时需要的记录ID
+}
 
-const tableData = ref<MemoryEntry[]>([]);
+// 从 localStorage 获取 token
+const token = localStorage.getItem('token');
+console.log('token:',token);
+// 如果没有 token，提示用户重新登录
+if (!token) {
+  ElMessage.error('请先登录');
+  router.push('/login');
+}
+// 设置请求头
+const config = {
+  headers: {
+    'token': token
+  }
+};
+
+const tableData = ref<MemoryFormData[]>([]);
 // 请求数据
 const fetchText = async () => {
   try {
-    const response2 = await fetch("/mock/memorys.json");
+    const response = await fetch("/mock/memorys.json")
+    // const response = await axios.get("/mock/memorys.json",
+    //   null,
+    //   config
+    // );
+    console.log("请求数据：",response);
     // 关键校验：状态码和内容类型
-    if (!response2.ok) console.log(`HTTP错误: ${response2.status}`);
-    const contentType = response2.headers.get("Content-Type");
+    const contentType = response.headers.get("Content-Type");
     if (!contentType?.includes("application/json")) {
       console.log("响应非 JSON 格式");
     }
-    const jsonData = await response2.json();
+    const jsonData = await response.json();
+    console.log('jsonData:',jsonData)
     // 使用ref包裹整个响应数据
-    tableData.value = jsonData.map((item: MemoryEntry) => ({
+    tableData.value = jsonData.map((item: MemoryFormData) => ({
       id: item.id,
       source: item.source,
       trans: item.trans,
+      fileId: item.fileId,
+      fileName: item.fileName,
       createTime: item.createTime,
       lastTime: item.lastTime,
-      status: item.status,
     }));
     console.log("请求json数据:", tableData.value);
   } catch (error) {
     console.error("请求失败:", error);
   }
 };
+
 onMounted(fetchText);
-// 编辑按钮
-const handleEdit = (row: FormData) => {
-  console.log("编辑行:", row);
-  Object.assign(formData, row);
-  dialogVisible.value = true;
-  //alert("编辑行");
-};
+
 // 删除按钮
 const handleDelete = (row: any) => {
-  tableData.value = tableData.value.filter(
-    (item: MemoryEntry) => item.id !== row.id
-  );
+  ElMessageBox.confirm("确定删除记忆？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(() => {
+    tableData.value = tableData.value.filter(
+      (item: MemoryFormData) => item.id !== row.id
+    );
+    ElMessage.success(`已删除该记忆`);
+  });
 };
-import { reactive } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 // 生成时间方法
 function formatYMD(date: Date) {
   const year = date.getFullYear();
@@ -123,38 +92,63 @@ function formatYMD(date: Date) {
 }
 const currentDate = ref<Date>(new Date());
 const formattedDate = formatYMD(currentDate.value);
-// 表单数据初始化
-const formData = reactive<MemoryEntry>({
+
+// 默认表单数据
+const defaultFormData : MemoryFormData = {
   source: "",
   trans: "",
+  fileId:"",
+  fileName:"",
+  createTime: formattedDate,
+  lastTime: formattedDate
+};
+// 表单数据初始化
+const formData = ref<MemoryFormData>({
+  source: "",
+  trans: "",
+  fileId: "暂无",
+  fileName: "暂无",
   createTime: formattedDate,
   lastTime: formattedDate,
-  status: "待审核",
 });
 const dialogVisible = ref(false);
+// 是否为编辑模式
+// const isEditMode = computed(() => !!formData.value.id); 
 const formRef = ref<any>(null);
 // 表单验证规则
 const rules = {
-  source: [{ required: true, message: "源术语必填", trigger: "blur" }],
+  source: [{ required: true, message: "源语言必填", trigger: "blur" }],
   trans: [{ required: true, message: "翻译结果必填", trigger: "blur" }],
+};
+
+// 编辑按钮
+// const handleEdit = (row: FormData) => {
+//   console.log("编辑行:", row);
+//   // Object.assign(formData, row);
+//   formData.value = { ...row }; 
+//   dialogVisible.value = true;
+//   //alert("编辑行");
+// };
+
+// 关闭弹窗(取消按钮)
+const closeDialog = () => {
+  dialogVisible.value = false;
+  formData.value = {
+    source: '',
+    trans: '',
+  }; // 重置表单数据
 };
 // 提交逻辑
 const submitForm = async () => {
-  await formRef.value.validate();
-  const newId = tableData.value.length + 1;
-  tableData.value.unshift({
-    id: newId,
-    ...formData,
-    status: "待审核", // 新增记录默认状态
-  });
-  dialogVisible.value = false;
-  ElMessage.success({
-    message: "新增成功",
-    customClass: "custom-message", // 注入自定义类名
-    duration: 3000,
-    offset: 60,
-  });
-  formRef.value.resetFields(); // 重置表单
+  const isValid = await formRef.value?.validate();
+  if (isValid) {
+    console.log()
+    // 新增逻辑
+    //await api.createTerm(requestData);
+    ElMessage.success('术语新增成功');
+    dialogVisible.value = false;
+    formData.value = { ...defaultFormData }; // 重置表单
+  };
 };
 // 新增按钮
 const handleAdd = () => {
@@ -169,12 +163,7 @@ const handleSelectionChange = (rows: any[]) => {
 // 批量删除
 const handleBatchDelete = () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning({
-      message: "请先选择要删除的术语",
-      customClass: "custom-message", // 注入自定义类名
-      duration: 3000,
-      offset: 60,
-    });
+    ElMessage.warning( "请先选择要删除的术语");
     return;
   }
 
@@ -182,17 +171,11 @@ const handleBatchDelete = () => {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
-    customClass: "custom-messagebox", // 自定义类名
   }).then(() => {
     tableData.value = tableData.value.filter(
-      (item) => !selectedRows.value.includes(item.id)
+      (item:any) => !selectedRows.value.includes(item.id)
     );
-    ElMessage.success({
-      message: `已删除 ${selectedRows.value.length} 条术语`,
-      customClass: "custom-message", // 注入自定义类名
-      duration: 3000,
-      offset: 60,
-    });
+    ElMessage.success(`已删除 ${selectedRows.value.length} 条术语`);
     selectedRows.value = []; // 清空选中状态
   });
 };
@@ -218,7 +201,7 @@ let scrollInterval: number | null | undefined = null;
 // 过滤后的查询到的数据
 const filteredData = computed(() => {
   return findData.value.filter(
-    (item) =>
+    (item:any) =>
       item.source.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       item.trans.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
@@ -251,7 +234,7 @@ onBeforeUnmount(() => {
   stopAutoScroll();
 });
 
-// 搜索处理（可扩展为API请求）
+// 搜索处理（待扩展为API请求）
 const handleSearch = () => {
   loading.value = true;
   setTimeout(() => {
@@ -267,47 +250,17 @@ const handleDetail = (row: any) => {
 const tableRowClassName = (rowIndex: number) => {
   return rowIndex % 2 === 0 ? "even-row" : "odd-row";
 };
-import { useRouter } from "vue-router";
-const router = useRouter();
+
 
 // 设置点击事件
 const showSettings = () => {
   alert("你点击了数据上传按钮");
   router.push('/file-manager')
 };
-// <div class="file-manager">
-//   <!-- 顶部路径导航 -->
-//   <div class="path-bar">
-//       <el-breadcrumb separator=">">
-//       <el-breadcrumb-item v-for="(item, index) in currentPath" :key="index">
-//           {{ item }}
-//       </el-breadcrumb-item>
-//       </el-breadcrumb>
-//   </div>
 
-//   <!-- 静态文件树示例 -->
-//   <div class="file-tree">
-//       <TreeNode
-//         v-for="item in staticFiles"
-//         :key="item.name"
-//         :item="item"
-//         :active-id="activeId"
-//         @update-node="onNodeUpdate"
-//         @node-click="handleNodeClick"
-//       />
-//     </div>
-
-//   <!-- 底部设置按钮 -->
-//   <div class="settings-footer">
-//       <el-button type="primary" @click="showSettings">
-//       <el-icon><Setting /></el-icon>系统设置
-//       </el-button>
-//   </div>
-// </div>
 </script>
 
 <template>
-  <!-- 2.左侧文件管理 -->
 
   <!-- 3.中间编辑区 -->
   <div class="editor-container">
@@ -323,21 +276,16 @@ const showSettings = () => {
       :header-cell-style="{ background: '#f5f7fa' }"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column type="index" label="序号" width="80" />
-      <el-table-column prop="source" label="源语言" min-width="150" />
+      <el-table-column type="index" label="序号" width="55" />
+      <el-table-column prop="source" label="源文本" min-width="150" />
       <el-table-column prop="trans" label="翻译结果" min-width="150" />
+      <el-table-column prop="fileId" label="文件ID" min-width="100" />
+      <el-table-column prop="fileName" label="文件名称" min-width="100" />
       <el-table-column prop="createTime" label="创建时间" width="120" />
       <el-table-column prop="lastTime" label="最后修改时间" width="120" />
-      <el-table-column prop="status" label="语言状态" width="100">
+      <el-table-column label="操作" width="85">
         <template #default="{ row }">
-          <el-tag :type="row.status === '已审核' ? 'success' : 'warning'">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="160">
-        <template #default="{ row }">
-          <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+          <!-- <el-button size="small" @click="handleEdit(row)">编辑</el-button> -->
           <el-button size="small" type="danger" @click="handleDelete(row)"
             >删除</el-button
           >
@@ -392,9 +340,9 @@ const showSettings = () => {
   </div>
 
   <!-- 新增弹窗 -->
-  <el-dialog v-model="dialogVisible" title="新增术语" width="30%">
+  <el-dialog v-model="dialogVisible" title="新增记忆" width="30%">
     <el-form :model="formData" :rules="rules" ref="formRef" label-width="100px">
-      <el-form-item label="源术语" prop="source">
+      <el-form-item label="源语言" prop="source">
         <el-input v-model="formData.source" placeholder="请输入英文术语" />
       </el-form-item>
       <el-form-item label="翻译结果" prop="trans">
@@ -402,70 +350,13 @@ const showSettings = () => {
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="dialogVisible = false">取消</el-button>
+      <el-button @click="closeDialog">取消</el-button>
       <el-button type="primary" @click="submitForm">提交</el-button>
     </template>
   </el-dialog>
 </template>
 
 <style>
-/*2. 主页面左侧栏*/
-.file-manager {
-  position: fixed;
-  width: 10%;
-  top: 60px;
-  height: calc(100vh - 60px);
-  border-right: 1px solid #e4e7ed;
-  display: flex;
-  flex-direction: column;
-
-  .path-bar {
-    padding: 12px;
-    border-bottom: 1px solid #ebeef5;
-    background: #f5f7fa;
-  }
-
-  .file-tree {
-    text-align: left; /* 全局左对齐 */
-    flex: 1;
-    padding: 8px 2px;
-    overflow-y: auto;
-    /* 全局样式或组件scoped样式 */
-    /* 激活节点样式 */
-    .tree-node.active-node {
-      background: #6db5e4;
-      box-shadow: inset 14px 0 0 #7fbad6;
-    }
-
-    /* 文件夹节点禁用交互 */
-
-    /* 常规节点交互 */
-    .tree-node:not(.folder-node) {
-      cursor: pointer;
-      transition: background 0.3s;
-
-      &:hover {
-        background: #e07a7a;
-      }
-    }
-    .children {
-      margin-left: 24px;
-      border-left: 1px dashed #e5e7eb;
-
-      /* 末级节点缩进优化 */
-      &:last-child {
-        margin-left: 28px;
-      }
-    }
-    /* 这里 */
-  }
-
-  .settings-footer {
-    padding: 12px;
-    border-top: 1px solid #ebeef5;
-    text-align: center;
-  }
-}
 
 /*3. 中间编辑区*/
 .editor-container {

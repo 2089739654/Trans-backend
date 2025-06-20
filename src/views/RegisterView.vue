@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
-//import { registerAPI } from '@/api/auth'
 
 const router = useRouter()
 const formRef = ref<any>()
@@ -50,10 +49,10 @@ const rules = reactive({
 })
 
 // 创建axios实例
-const service = axios.create({
-  baseURL: 'http://26.143.62.131:8080',
-  timeout: 5000
-})
+// const service = axios.create({
+//   baseURL: 'http://26.143.62.131:8080',
+//   timeout: 5000
+// })
 
 // 注册接口返回类型
 interface RegisterResponse {
@@ -85,7 +84,7 @@ const handleRegister = async () => {
           userName: form.userName
         }
         // 发送注册请求
-        const response = await service.post<RegisterResponse>('http://26.143.62.131:8080/admin/register', requestData)
+        const response = await axios.post<RegisterResponse>('http://26.143.62.131:8080/admin/register', requestData)//axios换成了service
         // 处理响应
         const { code, data, message } = response.data
         if (code === 200) {

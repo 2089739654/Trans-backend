@@ -2,13 +2,8 @@
 //哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
 import { useRouter } from "vue-router";
 const router = useRouter();
-import { ref, reactive, watch, onMounted, onBeforeUnmount } from "vue";
-//import { debounce } from 'lodash';
+import { ref, watch, onMounted} from "vue";
 
-// 组件中新增展开状态存储
-//const expandedNodes = ref(new Set());
-
-//import { type FileItem } from "../types/file_contents";
 // 定义文件节点类型
 interface FileItem {
   id: string;
@@ -18,11 +13,6 @@ interface FileItem {
   children?: FileItem[];
   content?: string;
 }
-// 设置点击事件
-const showSettings = () => {
-  alert("你点击了上传文件按钮");
-  router.push('/file-manager')
-};
 
 // 引入递归组件（需确认组件文件路径）
 import TreeNode from "../components/TreeNode.vue";
@@ -49,11 +39,6 @@ const fetchText = async () => {
       return;
     }
     console.log('请求总督文件：',token);
-    // const config = {
-    //   headers: {
-    //     'token': token
-    //   }
-    // };
     const response2 = await fetch(
       "http://26.143.62.131:8080/file/project/projects",
       {
@@ -128,43 +113,33 @@ const fetchText = async () => {
 // 组件处理数据时添加展开状态
 const onNodeUpdate = (updatedNode: FileItem) => {
   console.log("接收到更新:", updatedNode);
-  // if (updatedNode.isOpen) {
-  //   expandedNodes.value.add(updatedNode.id);
-  // } else {
-  //   expandedNodes.value.delete(updatedNode.id);
-  // }
-  staticFiles.value = (staticFiles.value ?? []).map((item: FileItem) =>
-    updateTreeItem(item, updatedNode)
-  );
+  staticFiles.value = updateTreeItem(staticFiles.value, updatedNode);
   console.log("更新后的:", staticFiles.value);
 };
 
-// 递归更新树节点（核心函数）
-const updateTreeItem = (node: FileItem, target: FileItem): FileItem => {
-  // console.log('当前节点:', node.id, '目标节点:', target.id);
-  if (node.id === target.id) {
-    // 创建新对象触发响应式更新
-    return {
-      ...node,
-      isOpen: target.isOpen, // 直接使用新状态
-      // 保留原有 children 的引用（避免重建整棵树）
-      children: node.children,
-      // children: node.children?.map(child => ({
-      //   ...child,
-      //   // 保持子节点原有状态（不强制继承父级展开状态）
-      // }))
-    };
-  }
-  if (node.children) {
-    return {
-      ...node,
-      children: node.children.map((child) => updateTreeItem(child, target)),
-    };
-  }
-  return node;
+// 单层结构更新函数（适用于非递归的扁平结构）
+const updateTreeItem = (list: FileItem[], target: FileItem): FileItem[] => {
+  return list.map((item) => {
+    if (item.id === target.id) {
+      // 找到目标节点，返回更新后的节点
+      return { ...item, ...target };
+    }
+    
+    // 如果当前节点有子节点，递归更新子节点
+    if (item.children && item.children.length > 0) {
+      return {
+        ...item,
+        children: updateTreeItem(item.children, target)
+      };
+    }
+    
+    // 不是目标节点且没有子节点，保持不变
+    return item;
+  });
 };
 
-const currentPath = ref(["示例", "树形文件"]); //根目录
+
+const currentPath = ref(["项目", "目录文件"]); //根目录
 const activeId = ref<string | null>(null); // 统一管理激活状态
 const handleNodeClick = (item: FileItem) => {
   // 每次点击新节点时重置激活状态
@@ -203,10 +178,7 @@ onMounted(() => {
   });
 });
 
-// import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElDivider } from 'element-plus';
-// import { useContextMenu } from '@vueuse/core';
 // 状态管理
-//const visible = ref(true);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 const contextMenuData = ref<FileItem | null>(null);
@@ -237,14 +209,7 @@ const closeContextMenu = () => {
 const createFileModalVisible = ref(false);
 const newFileName = ref('新文件.txt');
 const currentParentNode = ref<FileItem | null>(null);
-// 打开新建文件模态框
-const openCreateFileModal = (parentNode: FileItem) => {
-  console.log('新文件')
-  currentParentNode.value = parentNode;
-  newFileName.value = '新文件.txt'; // 默认值
-  createFileModalVisible.value = true;
-  contextMenuVisible.value = false; // 关闭上下文菜单
-};
+
 // 确认创建文件
 const confirmCreateFile = () => {
   if (!currentParentNode.value) return;
@@ -322,34 +287,6 @@ const handleAddFile = () => {
   // });
 };
 
-// 新建文件夹
-// const handleAddFolder = () => {
-//   const parentNode = contextMenuData.value;
-//   if (!parentNode || !parentNode.isFolder) return;
-  
-//   const newFolder: FileItem = {
-//     id: `folder_${Date.now()}`,
-//     name: '新文件夹',
-//     isFolder: true,
-//     children: []
-//   };
-  
-//   staticFiles.value = updateTreeWithNewItem(
-//     staticFiles.value,
-//     parentNode.id,
-//     newFolder
-//   );
-  
-//   // 展开父文件夹
-//   if (!parentNode.isOpen) {
-//     const updatedParent: FileItem = {
-//       ...parentNode,
-//       isOpen: true
-//     };
-//     onNodeUpdate(updatedParent);
-//   }
-// };
-
 import { ElMessage } from "element-plus";
 // 状态管理
 const createRootFolderVisible = ref(false);
@@ -362,14 +299,9 @@ const openCreateRootFolderModal = () => {
   createRootFolderVisible.value = true;
 };
 
-// 关闭模态框
-// const handleCloseCreateFolder = (done: Function) => {
-//   createRootFolderVisible.value = false;
-//   done();
-// };
 import axios from 'axios';
 
-// 创建根文件夹
+// 创建项目
 const createRootFolder = async() => {
   const name = newFolderName.value.trim();
   if (!name) {
@@ -436,42 +368,113 @@ const createRootFolder = async() => {
 
 
 // 重命名
-const handleRename = () => {
+const handleRename = async () => {
   const node = contextMenuData.value;
-  console.log('node:',node)
+  console.log("node:", node);
   if (!node) return;
-  
-  const newName = prompt('请输入新名称:', node.name);
+
+  const projectId: number = node.id;
+  const newName = prompt("请输入新名称:", node.name);
   if (!newName || newName === node.name) return;
-  
+
   const updatedNode: FileItem = {
     ...node,
-    name: newName
+    name: newName,
   };
-  
-  staticFiles.value = updateTreeItem(
-    staticFiles.value,
-    updatedNode
-  );
+
+  try {
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem("token");
+    console.log("token:", token);
+    // 如果没有 token，提示用户重新登录
+    if (!token) {
+      ElMessage.error("请先登录");
+      router.push("/login");
+      return;
+    }
+    // 设置请求头
+    const config = {
+      headers: {
+        token: token,
+      },
+    };
+
+    if(node.isFolder){
+      const response = await axios.post(
+        `http://26.143.62.131:8080/file/project/update?projectId=${projectId}&name=${newName}`,
+        null,
+        config
+      );
+      console.log("项目重命名成功：", response.data);
+      staticFiles.value = updateTreeItem(staticFiles.value, updatedNode);
+      ElMessage.success(`项目 "${node.name}" 重命名为 "${newName}"`);
+    }
+    else{
+      console.log("传顶顶顶顶",projectId,newName)
+      const response = await axios.post(
+        `http://26.143.62.131:8080/file/renameFile?fileId=${projectId}&newName=${newName}`,
+        null,
+        config
+      );
+      console.log("文件重命名成功：", response.data);
+      staticFiles.value = updateTreeItem(staticFiles.value, updatedNode);
+      ElMessage.success(`文件 "${node.name}" 重命名为 "${newName}"`);
+    }
+  } catch (error) {
+    console.log("重命名失败：", error);
+  }
+  // 更新显示
 };
 
 // 删除
-const handleDelete = () => {
+const handleDelete = async () => {
   const node = contextMenuData.value;
   if (!node) return;
-  
+
   if (!confirm(`确定要删除 "${node.name}" 吗？`)) return;
-  
-  staticFiles.value = removeTreeNode(
-    staticFiles.value,
-    node.id
-  );
-  
+
+  const projectId: number = node.id;
+  // 从 localStorage 获取 token
+  const token = localStorage.getItem("token");
+  console.log("token:", token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error("请先登录");
+    router.push("/login");
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      token: token,
+    },
+  };
+  if(node.isFolder){
+    const response = await axios.post(
+      `http://26.143.62.131:8080/file/project/delete?projectId=${projectId}`,
+      null,
+      config
+    );
+    console.log("项目删除成功：", response.data);
+  }
+  else{
+    const formData = [projectId]
+    console.log('删除提交',formData)
+    const response = await axios.post(
+      `http://26.143.62.131:8080/file/deleteFile`,
+      formData,
+      config
+    );
+    console.log("文件删除成功：", response.data);
+  }
+  staticFiles.value = removeTreeNode(staticFiles.value, node.id);
+
   // 如果删除的是当前激活的文件，重置activeId
   if (activeId.value === node.id) {
     activeId.value = null;
   }
 };
+
 
 // 辅助函数：在树中添加新节点
 const updateTreeWithNewItem = (nodes: FileItem[], parentId: string, newItem: FileItem): FileItem[] => {
@@ -494,39 +497,34 @@ const updateTreeWithNewItem = (nodes: FileItem[], parentId: string, newItem: Fil
 
 // 辅助函数：从树中移除节点
 const removeTreeNode = (nodes: FileItem[], nodeId: string): FileItem[] => {
-  return nodes.filter(node => {
+  return nodes.reduce((acc: FileItem[], node: FileItem) => {
+    // 如果是目标节点，直接过滤掉
     if (node.id === nodeId) {
-      return false;
+      return acc;
     }
-    if (node.children) {
-      return {
+    
+    // 如果有子节点，递归处理
+    if (node.children && node.children.length > 0) {
+      const updatedChildren = removeTreeNode(node.children, nodeId);
+      
+      // 只添加子节点更新后的节点
+      acc.push({
         ...node,
-        children: removeTreeNode(node.children, nodeId)
-      };
+        children: updatedChildren
+      });
+    } else {
+      // 没有子节点的节点直接添加
+      acc.push(node);
     }
-    return true;
-  });
+    
+    return acc;
+  }, [] as FileItem[]);
 };
+
 
 // 点击其他区域关闭右键菜单
 document.addEventListener('click', closeContextMenu);
-// document.addEventListener('click', (event) => {
-//   if (!contextMenuVisible.value) return;
-  
-//   // 检查点击是否发生在右键菜单外部
-//   const contextMenuElement = document.querySelector('.context-menu');
-//   if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
-//     closeContextMenu();
-//   }
-// });
 
-// // 右键点击其他区域关闭右键菜单
-// document.addEventListener('contextmenu', (event) => {
-//   if (contextMenuVisible.value) {
-//     event.preventDefault();
-//     closeContextMenu();
-//   }
-// });
 </script>
 
 <template>
@@ -560,13 +558,6 @@ document.addEventListener('click', closeContextMenu);
         <el-icon><Plus /></el-icon>添加文件夹
       </el-button>
     </div>
-
-    <!-- 底部设置按钮 -->
-    <!-- <div class="settings-footer">
-      <el-button type="primary" @click="showSettings">
-        <el-icon><Setting /></el-icon>上传文件
-      </el-button>
-    </div> -->
   </div>
 
   <!-- 创建根文件夹模态框 -->
@@ -781,6 +772,7 @@ document.addEventListener('click', closeContextMenu);
   background-color: #f5f7fa;
   color: #606266;
 }
+
 /* 右键菜单样式 */
 .context-menu {
   position: fixed;

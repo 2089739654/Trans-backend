@@ -2,8 +2,6 @@ import Mock from 'mockjs'
 //import { ref ,shallowRef } from 'vue'
 import mockData from './originalText.json'// 加载数据文件
 
-//const changeData = ref(shallowRef(mockData))
-
 export default [
   {
     url: '/api/submit',

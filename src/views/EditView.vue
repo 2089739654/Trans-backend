@@ -1,243 +1,716 @@
 <script setup lang="ts">
-import { ref } from "vue";
-//哈哈哈哈哈哈哈哈哈哈哈哈十分
-import { onMounted } from "vue";
-import axios from "axios";
+import { ref ,onMounted } from "vue";
+import {computed} from "vue";
 
-import { type OriginalText } from "../types/original_text";
-import { type TextEntry } from "../types/original_text";
+interface memoryItem {
+  sourceText: string
+  translatedText: string
+}
 
-// 数据内容
-const textText = ref<OriginalText>({
-  title: "",
-  fullText: [],
-});
+// 当前页的句子
+const pageSentences = ref<{
+  id: string
+  originalText: string
+  transText: string
+  version: number
+  isEditing: boolean
+  memoryLists: memoryItem[]
+}[]>([])
+
 
 // 哈哈哈哈哈哈哈哈哈哈哈哈
 import { watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
-const fetchText = watch(
-  () => route.params.fileId,
-  async (newId: string) => {
-    console.log(newId);
-    try {
-      // 根据ID调用API获取文件内容   http://26.143.62.131:8080/file/getTransText
-      const response = await fetch(`/documents/${newId}.json`); //(`/api/docs/${newId}`);
-      console.log(response)
-      // 关键校验：状态码和内容类型
-      if (!response.ok) console.log(`HTTP错误: ${response.status}`);
-      const contentType = response.headers.get("Content-Type");
-      if (!contentType?.includes("application/json")) {
-        console.log("响应非 JSON 格式");
-      }
-      const jsonData = await response.json();
-      // 使用ref包裹整个响应数据
-      textText.value = {
-        title: jsonData.title,
-        fullText: jsonData.fullText.map((item: TextEntry) => ({
-          originalText: item.originalText,
-          baseText: item.baseText,
-          finalText: item.finalText,
-        })),
-      };
-      console.log("请求json数据:", textText.value);
-      fullTranslation.value =
-        textText.value?.fullText[0]?.finalText +
-        textText.value?.fullText[1]?.finalText +
-        textText.value?.fullText[2]?.finalText;
-      sentencesLength.value = textText.value.fullText.length;
-    } catch (error) {
-      console.error("请求失败:", error);
-    }
-  },
-  { immediate: true }
-);
+const router = useRouter();
+const id = route.params.fileId;
+console.log('id:',id);
 
-import { Download } from "@element-plus/icons-vue";
+// 分页相关状态
+const currentPage = ref(1)      // 当前页码
+const pageSize = ref(10)        // 每页显示数量
+const totalSentences = ref(0)   // 总句子数
+const totalPages = computed(() => Math.ceil(totalSentences.value / pageSize.value)) // 总页数
+
+const currentIndex = ref(0)     // 当前选中的句子索引
+const inputText = ref('')       // 输入框内容
+
+const editingIndex = ref(-1)    // 当前正在编辑的句子索引
+const tempTranslation = ref('') // 临时翻译内容
+const contentRef = ref(null)    // 内容区域引用
+
+import axios from 'axios'
 import { ElMessage } from "element-plus";
 
-//44444
-// 示例导出数据（整段文本）
-const fullTranslation = ref(
-  `这里是一段完整的翻译结果文本示例...Vue3的组合式API提供了更强大的逻辑封装能力，通过setup函数可以更好地组织代码。相较于Options API，Composition API在复杂组件开发中表现出更好的可维护性。同时，Vue3对TypeScript的支持也更加完善，类型推断能力显著提升...`
-);
-// 当前句子总数
-const sentencesLength = ref(0);
-//2222
+// 获取当前页数
+const fetchTotalPages = async()=>{
+  console.log("请求页数")
+      // 从 localStorage 获取 token
+    const token = localStorage.getItem('token');
+    console.log('token:',token);
+    // 如果没有 token，提示用户重新登录
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+    // 设置请求头
+    const config = {
+      headers: {
+        'token': token
+      }
+    };
+    // 发送POST请求，包含JSON请求体
+    const response = await axios.post(`http://26.143.62.131:8080/file/getTransTextCount?fileId=${id}`, 
+      null,
+      config,
+    )
+    console.log("返回页数",response.data.data)
+    totalSentences.value = response.data.data
+}
 
-// 请求数据
-// const fetchText = async () => {
-//     try {
-//         // const response = await axios.get('/mock/originalText.json')
-//         // textText.value = response.data.fullText//[0].originalText // 注意数据结构匹配
-//         const response2 = await fetch('/mock/originalText.json');
-//         // 关键校验：状态码和内容类型
-//         if (!response2.ok) console.log(`HTTP错误: ${response2.status}`);
-//         const contentType = response2.headers.get('Content-Type');
-//         if (!contentType?.includes('application/json')) {
-//         console.log('响应非 JSON 格式');
-//         }
-//         const jsonData = await response2.json();
-//         // 使用ref包裹整个响应数据
-//         textText.value = {
-//         title: jsonData.title,
-//         fullText: jsonData.fullText.map(item => ({
-//             originalText: item.originalText,
-//             baseText: item.baseText,
-//             finalText: item.finalText
-//         }))
-//         };
-//         console.log('请求json数据:',textText.value)
-//         fullTranslation.value = textText.value?.fullText[0]?.finalText + textText.value?.fullText[1]?.finalText + textText.value?.fullText[2]?.finalText
-//         sentencesLength.value = textText.value.fullText.length
-//     } catch (error) {
-//         console.error('请求失败:', error)
-//     }
-// }
+// 获取当前页的句子
+const fetchPageData = async (page: number = 1, size: number = 10) => {
+  try {
+    // 构建JSON格式请求体
+    const requestBody = {
+      fileId: id,
+      currentPage: page,
+      size: size
+    }
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem('token');
+    console.log('token:',token);
+    // 如果没有 token，提示用户重新登录
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+    // 设置请求头
+    const config = {
+      headers: {
+        'token': token
+      }
+    };
+    // 发送POST请求，包含JSON请求体
+    const response = await axios.post('http://26.143.62.131:8080/file/getTransText', 
+      requestBody,
+      config,
+    )
+    console.log("返回",response.data)
+    if (response.data.code != 200) throw new Error(`HTTP错误: ${response.status}`)
+    
+    const jsonData = await response.data.data
+    console.log("hhhh",jsonData);
+    // 更新总句子数
+    //totalSentences.value = jsonData.fullText.length
+    
+    // 更新当前页数据
+    pageSentences.value = jsonData.map((item: any) => ({
+      id: item.id,
+      originalText: item.sourceText,
+      transText: item.translatedText,
+      version:item.version,
+      isEditing: false,
+      memoryLists: null,
+    }))
+    console.log("sssssimopnt:",pageSentences.value);
+    // 如果当前页没有数据且不是第一页，尝试加载前一页
+    if (pageSentences.value.length === 0 && page > 1) {
+      currentPage.value = page - 1
+      await fetchPageData(page - 1, size)
+    } else {
+      // 重置当前句子索引
+      currentIndex.value = 0
+      inputText.value = pageSentences.value[0]?.finalText || ''
+    }
+    
+    console.log(`成功加载第${page}页数据，共${pageSentences.value.length}条`)
+  } catch (error) {
+    console.error("分页加载失败:", error)
+  }
+}
 
-//333333
-// 示例数据
-const systemPrompt = ref(
-  `系统提示：建议注意专业术语一致性...当前项目术语库匹配率：92%`
-);
-import { nextTick } from "vue";
+// 监听路由参数变化，重新加载数据
+watch(
+  () => route.params.fileId,
+  async (newId: string) => {
+    console.log('文件ID变更，重新加载数据:', newId)
+    currentPage.value = 1 // 重置到第一页
+    await fetchPageData()
+  },
+  { immediate: true }
+)
 
-const inputText = ref("");
-// 提交数据
-const handleSubmit = async () => {
-  console.log("提交内容:", inputText.value);
-  if (!inputText.value.trim()) {
-    console.log("内容不能为空");
-    ElMessage.warning("内容不能为空");
+// 监听页码变化，加载对应页数据
+watch(currentPage, async (newPage:any) => {
+  // 关闭当前编辑状态
+  editingIndex.value = -1
+  await fetchPageData(newPage, pageSize.value)
+})
+
+// 监听每页数量变化，重新加载数据
+watch(pageSize, async (newSize:any) => {
+  // 关闭当前编辑状态
+  editingIndex.value = -1
+  await fetchPageData(currentPage.value, newSize)
+})
+
+// 开始编辑句子
+const startEdit = (index: number) => {
+  editingIndex.value = index
+  tempTranslation.value = pageSentences.value[index].transText || ''
+  
+  // 滚动到编辑的句子位置
+  nextTick(() => {
+    const elements = document.querySelectorAll('.translation-pair')
+    if (elements[index]) {
+      elements[index].scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  })
+}
+
+// 临时保存翻译
+const saveTranslation = async (index: number) => {
+  if (!tempTranslation.value.trim()) return
+
+  const sentence = pageSentences.value[index]
+  console.log('替换的：',tempTranslation.value,'替换的：',sentence)
+  sentence.isEditing = 'success'
+  sentence.transText = tempTranslation.value
+  setTimeout(() => {
+    editingIndex.value = -1
+    sentence.isEditing = false
+  }, 1000)
+  // 从 localStorage 获取 token
+  // const token = localStorage.getItem('token');
+  // console.log('token:',token);
+  // // 如果没有 token，提示用户重新登录
+  // if (!token) {
+  //   ElMessage.error('请先登录');
+  //   router.push('/login');
+  //   return;
+  // }
+  // // 设置请求头
+  // const config = {
+  //   headers: {
+  //     'token': token
+  //   }
+  // };
+
+  // try {
+  //   // 构建请求体
+  //   const requestBody = {
+  //     fileId: id, // 文件ID
+  //     list:[
+  //       {
+  //         id: sentence.id,
+  //         sourceText: sentence.originalText,
+  //         translatedText: tempTranslation.value
+  //       }
+  //     ]
+  //   }
+    
+  //   // 显示保存中状态
+  //   sentence.isEditing = 'saving'
+    
+  //   // 发送请求到后端
+  //   const response = await axios.post(`http://26.143.62.131:8080/file/saveTransText`, 
+  //     requestBody,
+  //     config
+  //   )
+    
+  //   console.log("返回结果：",response)
+
+  //   // 更新翻译内容
+  //   sentence.transText = tempTranslation.value
+    
+  //   console.log(`已成功保存第${getGlobalIndex(index) + 1}句的翻译`)
+    
+  //   // 显示保存成功提示
+  //   sentence.isEditing = 'success'
+  //   setTimeout(() => {
+  //     editingIndex.value = -1
+  //     sentence.isEditing = false
+  //   }, 1000)
+    
+  // } catch (error) {
+  //   console.error("保存翻译失败:", error)
+    
+  //   // 显示保存失败提示
+  //   sentence.isEditing = 'error'
+  //   setTimeout(() => {
+  //     sentence.isEditing = true // 恢复编辑状态
+  //   }, 2000)
+  // }
+}
+
+// 取消编辑
+const cancelEdit = () => {
+  editingIndex.value = -1
+}
+
+// 处理分页大小变化
+const handleSizeChange = (newSize: number) => {
+  pageSize.value = newSize
+}
+
+// 处理页码变化
+const handleCurrentChange = (newPage: number) => {
+  currentPage.value = newPage
+}
+
+// 获取全局索引（相对于整个文档）
+const getGlobalIndex = (pageIndex: number) => {
+  return (currentPage.value - 1) * pageSize.value + pageIndex
+}
+
+// 导出全文
+const exportAllPages = async () => {
+  try {
+    // 如果已经知道总页数，可以循环获取所有页数据
+    let allContent = ''
+    
+    for (let page = 1; page <= totalPages.value; page++) {
+      const response = await fetch(`/documents/${id}.json?page=${page}&size=${pageSize.value}`)
+      const jsonData = await response.json()
+      
+      const pageContent = jsonData.fullText.map((item: any, index: number) => {
+        const globalIndex = (page - 1) * pageSize.value + index + 1
+        const original = item.originalText
+        const translation = item.transText || '待翻译'
+        return `${globalIndex}. ${original}\n   → ${translation}`
+      }).join('\n\n')
+      
+      allContent += `\n\n===== 第${page}页 =====\n\n` + pageContent
+    }
+    
+    downloadFile(`translation_full.txt`, allContent.trim())
+  } catch (error) {
+    console.error("导出全文失败:", error)
+    // 可以考虑使用不分页的API获取全文
+  }
+}
+
+// 下载文件辅助函数
+const downloadFile = (filename: string, content: string) => {
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+// 批量提交
+const uploadTranslation = async () => {
+  //const sentence = pageSentences.value[index]
+  //console.log('替换的：',tempTranslation.value,'替换的：',sentence)
+  console.log('批量提交')
+  // 从 localStorage 获取 token
+  const token = localStorage.getItem('token');
+  console.log('token:',token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error('请先登录');
+    router.push('/login');
     return;
   }
-  try {//http://26.143.62.131:8080/file/saveTransText
-    const response = await axios.post("/api/submit", {
-      content: inputText.value.trim(),
-    });
-    await nextTick(); // 等待DOM更新
-    console.log("提交成功，返回：",response);
-    ElMessage.success("提交成功！");
-    inputText.value = ""; // 清空输入框
+  // 设置请求头
+  const config = {
+    headers: {
+      'token': token
+    }
+  };
+
+  try {
+    // 构建请求体
+    const uploadedTranslation = ref([]);
+    console.log('fason11g:',pageSentences.value)
+    uploadedTranslation.value = pageSentences.value.map((item: any) => ({
+      id: item.id,
+      sourceText: item.originalText,
+      translatedText: item.transText
+    }))
+
+    const requestBody = {
+      fileId: id, // 文件ID
+      list: uploadedTranslation.value
+    }
+    console.log('fasong:',requestBody)
+    
+    // 发送请求到后端
+    const response = await axios.post(`http://26.143.62.131:8080/file/saveTransText`, 
+      requestBody,
+      config
+    )
+    console.log(response.data)
+    if(response.data.code == 200){
+      ElMessage.success("提交成功！")
+    }
+    // 重新请求数据
+    await fetchPageData();
+    console.log("返回结果：",response)   
   } catch (error) {
-    console.log("提交失败: " + error);
+    console.error("保存翻译失败:", error)
   }
-};
-// 当前索引
-const currentIndex = ref(0);
-// 上下项按钮操作方法
-const prevItem = () => {
-  if (currentIndex.value > 0) {
-    currentIndex.value--;
-  }
-};
-const nextItem = () => {
-  if (currentIndex.value < sentencesLength.value - 1) {
-    currentIndex.value++;
-  }
-};
+}
 
-// console.log(1,textText.value.value)
-// 导出功能
-const exportTranslation = () => {
-  const blob = new Blob([fullTranslation.value], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `translation_${new Date().toISOString().slice(0, 10)}.txt`;
-  link.click();
-  ElMessage.success("导出成功");
-};
+// 机械翻译
+const machineTranslation = async (index: number) => {
+  //if (!tempTranslation.value.trim()) return
 
-onMounted(fetchText);
-//console.log(2,textText.value.value)
+  const sentence = pageSentences.value[index]
+  console.log('机械替换的:',sentence)
+  sentence.isEditing = 'success'
+
+  //从 localStorage 获取 token
+  const token = localStorage.getItem('token');
+  console.log('token:',token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error('请先登录');
+    router.push('/login');
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      'token': token
+    }
+  };
+
+  try {
+    // 构建请求体
+    const requestBody = { 
+      sourceText: sentence.originalText,
+      fileId: id
+    }
+    
+    // 显示保存中状态
+    // sentence.isEditing = 'saving'
+    console.log("机器",requestBody)
+    // 发送请求到后端
+    const response = await axios.post(`http://26.143.62.131:8080/file/translateText`, 
+      requestBody,
+      config
+    )
+    
+    console.log("机器返回结果：",response)
+
+    // 更新翻译内容
+    sentence.transText = response.data.data
+    
+    console.log(`已成功展示第${getGlobalIndex(index) + 1}句的翻译`)
+    
+    console.log(pageSentences.value)
+    // // 显示保存成功提示
+    // sentence.isEditing = 'success'
+    // setTimeout(() => {
+    //   editingIndex.value = -1
+    //   sentence.isEditing = false
+    // }, 1000)
+    
+  } catch (error) {
+    console.error("请求翻译失败:", error)
+    
+    // 显示保存失败提示
+    sentence.isEditing = 'error'
+    setTimeout(() => {
+      sentence.isEditing = true // 恢复编辑状态
+    }, 2000)
+  }
+}
+
+// 回退翻译记录
+const backTranslation = async (index: number) => {
+  const sentence = pageSentences.value[index]
+  console.log('回退翻译记录:',sentence)
+  sentence.isEditing = 'success'
+
+  //从 localStorage 获取 token
+  const token = localStorage.getItem('token');
+  console.log('token:',token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error('请先登录');
+    router.push('/login');
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      'token': token
+    }
+  };
+
+  try {
+    // 构建请求体
+    const requestBody = { 
+      transId: sentence.id,
+      version: sentence.version,
+    }
+    
+    // 显示保存中状态
+    // sentence.isEditing = 'saving'
+    console.log("回退",requestBody)
+    // 发送请求到后端
+    const response = await axios.post(`http://26.143.62.131:8080/file/getTranslationHistory`, 
+      requestBody,
+      config
+    )
+    
+    console.log("版本返回结果：",response)
+
+    // 更新翻译内容
+    sentence.transText = response.data.data.translatedText
+    sentence.version = response.data.data.version
+    
+    console.log(`已成功回退第${getGlobalIndex(index) + 1}句的翻译`)
+    
+    console.log(pageSentences.value)
+  } catch (error) {
+    console.error("回退翻译失败:", error)
+    
+    // 显示保存失败提示
+    sentence.isEditing = 'error'
+    setTimeout(() => {
+      sentence.isEditing = true // 恢复编辑状态
+    }, 2000)
+  }
+}
+
+// 记忆列表
+//const memoryList = ref<memoryItem[]>([])
+// 记忆库查询
+const memorySelect = async (index: number) => {
+  const sentence = pageSentences.value[index]
+  console.log('记忆库替换的:',sentence)
+
+  //从 localStorage 获取 token
+  const token = localStorage.getItem('token');
+  console.log('token:',token);
+  // 如果没有 token，提示用户重新登录
+  if (!token) {
+    ElMessage.error('请先登录');
+    router.push('/login');
+    return;
+  }
+  // 设置请求头
+  const config = {
+    headers: {
+      'token': token
+    }
+  };
+
+  try {
+    // 构建请求体
+    const requestBody = { 
+      text: sentence.originalText,
+      transId: sentence.id
+    }
+    
+    // 显示保存中状态
+    // sentence.isEditing = 'saving'
+    console.log("记忆",requestBody)
+    // 发送请求到后端
+    const response = await axios.post(`http://26.143.62.131:8080/file/searchTransPairs`, 
+      requestBody,
+      config
+    )
+    
+    console.log("记忆返回结果：",response)
+    // 记忆列表
+    sentence.memoryList = response.data.data.map((item:any)=>({
+      sourceText: item.sourceText,
+      translatedText: item.translatedText,
+    }))
+
+    console.log("记忆列表:",sentence.memoryList)
+
+    if(sentence.memoryList == null){
+      ElMessage.success(`查询为空！`);
+    }
+
+    if(response.data.code==200 && sentence.memoryList != null){
+      ElMessage.success(`已成功展示第${getGlobalIndex(index) + 1}句的记忆库查询结果`);
+    }
+
+    console.log(`已成功展示第${getGlobalIndex(index) + 1}句的记忆库查询结果`)
+    
+    console.log(pageSentences.value)
+  } catch (error) {
+    console.error("请求翻译失败:", error)
+    
+    // 显示保存失败提示
+    sentence.isEditing = 'error'
+    setTimeout(() => {
+      sentence.isEditing = true // 恢复编辑状态
+    }, 2000)
+  }
+}
+
+onMounted(async () => {
+  await fetchTotalPages()
+  await fetchPageData()
+})
+//console.log(2,textText.value.value)  machineTranslation
 </script>
 
 <template>
   <!-- 3.中间编辑区 -->
   <div class="editor-container1">
-    <!-- 操作按钮 -->
-    <div class="controls">
-      <button @click="prevItem">上一项</button>
-      第{{ currentIndex + 1 }}句
-      <button @click="nextItem">下一项</button>
-    </div>
-    <!-- 原文展示区 -->
-    <div class="section original-text">
-      <h3>原文内容</h3>
-      <div class="content-box">
-        {{ textText?.fullText[currentIndex]?.originalText }}
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+      <!-- <div class="title">文档翻译</div> -->
+      
+      <div class="pagination-controls">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 30]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalSentences"
+        ></el-pagination>
+      </div>
+      
+      <div class="export-btn">
+        <el-button type="primary" @click="uploadTranslation">
+          <el-icon><Check /></el-icon>批量提交
+        </el-button>
+        <el-button type="primary" @click="exportAllPages">
+          <el-icon><Download /></el-icon>导出全文
+        </el-button>
       </div>
     </div>
+    
+    <!-- 翻译内容区域 -->
+    <div class="translation-content" ref="contentRef">
+      <div 
+        v-for="(item, index) in pageSentences" 
+        :key="index"
+        class="translation-pair"
+        :class="{ 'active-pair': editingIndex === index }">
+        
+        <!-- 原文句子 -->
+        <div class="original-sentence">
+          <div class="sentence-header">
+            <span class="sentence-number">{{ getGlobalIndex(index) + 1 }}.</span>
+            <span class="sentence-label" style="font-weight: bold;">原文</span>
+          </div>
+          <div class="sentence-content">
+            {{ item.originalText }}
+          </div>
+        </div>
+        
+        <!-- 翻译句子 -->
+        <div class="translation-sentence">
+          <div class="sentence-header">
+            <!-- <span class="sentence-number">{{ getGlobalIndex(index) + 1 }}.</span> -->
+            <span class="sentence-label" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;翻译</span>
+            
+            <!-- 编辑状态下显示提交按钮 -->
+            <div v-if="editingIndex === index" class="edit-controls">
+              <el-button 
+                type="primary" 
+                size="small" 
+                @click="saveTranslation(index)">
+                确定
+              </el-button>
+              <el-button 
+                size="small" 
+                @click="cancelEdit()">
+                取消
+              </el-button>
+            </div>
+            
+            <!-- 非编辑状态下显示编辑按钮 -->
+            <div v-else class="edit-controls">
+              <el-button 
+                type="text" 
+                size="small" 
+                @click="startEdit(index)">
+                <el-icon><Edit /></el-icon>编辑
+              </el-button>
+              <el-button 
+                size="small" 
+                @click="backTranslation(index)">
+                回退版本
+              </el-button>
+              
+              <el-button 
+                size="small" 
+                @click="machineTranslation(index)">
+                机器翻译
+              </el-button>
+            </div>
+          </div>
+          
+          <!-- 编辑状态下显示文本框 -->
+          <div v-if="editingIndex === index" class="sentence-editor">
+            <el-input
+              v-model="tempTranslation"
+              type="textarea"
+              :rows="3"
+              auto-size
+              placeholder="请输入翻译内容"
+              @blur="saveTranslation(index)"
+            ></el-input>
+          </div>
+          
+          <!-- 非编辑状态下显示翻译内容 -->
+          <div v-else class="sentence-content">
+            {{ item.transText || '待翻译' }}
+          </div>
+        </div>
 
-    <!-- 初译结果 -->
-    <div class="section translation-result">
-      <h3>初译结果</h3>
-      <div class="content-box">
-        {{ textText?.fullText[currentIndex]?.baseText }}
+        <!-- 记忆库查询 -->
+        <div class="original-sentence">
+          <div class="sentence-header">
+            <!-- <span class="sentence-number">{{ getGlobalIndex(index) + 1 }}.</span> -->
+            <span class="sentence-label" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;记忆库查询</span>
+            <!-- 查询按钮 -->
+            <div  class="edit-controls">
+              <el-button 
+                type="primary" 
+                size="small" 
+                @click="memorySelect(index)">
+                记忆库查询
+              </el-button>
+            </div>
+          </div>
+
+          <div class="memory-list-container">
+            <div v-if="item.memoryList && item.memoryList.length > 0" 
+                v-for="(item2, index) in item.memoryList" 
+                :key="index" 
+                class="memory-item">
+              <div class="label-row">
+                <span class="index-number">{{ index + 1 }} .</span>
+                <span class="source-label">原文</span>
+              </div>
+              <p class="source-text">{{ item2.sourceText }}</p>
+              
+              <div class="label-row">
+                <span class="translation-label">译文</span>
+              </div>
+              <p class="translated-text">{{ item2.translatedText }}</p>
+            </div>
+          
+            <!-- 当列表为空时显示提示 -->
+            <div v-else class="empty-state">
+              <p>空空如也/(ㄒoㄒ)/~~</p>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
-
-    <!-- 提示词 -->
-    <div class="section prompt-area">
-      <h3>提示建议</h3>
-      <div class="content-box">{{ systemPrompt }}</div>
-    </div>
-
-    <!-- 输入与提交 -->
-    <div class="input-group">
-      <el-input
-        v-model="inputText"
-        placeholder="请输入修改内容"
-        class="input-field"
-        :rows="4"
-        clearable />
-      <el-button type="primary" @click="handleSubmit" class="submit-btn"
-        >提交修改</el-button
-      >
-    </div>
-  </div>
-
-  <!-- 4.右侧结果全文展示 -->
-  <div class="result-container1">
-    <!-- 原文整段滚动区域 -->
-    <div class="fulltext-scroll">
-      <!-- <pre class="translation-content"> -->
-      原文
-      <div
-        class="translation-content"
-        v-for="(item, index) in textText?.fullText"
-        :key="index">
-        <span :class="{ 'highlighted-text': index == currentIndex }">
-          {{ index + 1 }},{{ item.originalText }}
-        </span>
-      </div>
-      <!-- </pre> -->
-      <!-- <pre class="translation-content">
-            1,{{ textText?.fullText[0]?.finalText }}
-            2,{{ textText?.fullText[1]?.finalText }}
-            3,{{ textText?.fullText[2]?.finalText }}
-        </pre> -->
-    </div>
-    <!-- 译文整段滚动区域 -->
-    <div class="fulltext-scroll">
-      译文
-      <!-- <pre class="translation-content"> -->
-      <div
-        class="translation-content"
-        v-for="(item, index) in textText?.fullText"
-        :key="index">
-        <span :class="{ 'highlighted-text': index == currentIndex }">
-          {{ index + 1 }},{{ item.finalText }}
-        </span>
-      </div>
-    </div>
-    <!-- 底部固定导出按钮 -->
-    <div class="export-footer">
-      <el-button type="primary" @click="exportTranslation">
-        <el-icon><Download /></el-icon>导出全文
-      </el-button>
     </div>
   </div>
 </template>
@@ -248,118 +721,151 @@ onMounted(fetchText);
   position: fixed;
   left: 20%;
   top: 60px;
-  width: 50%;
+  width: 80%;
   height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   border-left: 1px solid #e4e7ed;
   border-right: 1px solid #e4e7ed;
   padding: 16px;
-
-  .controls button {
-    margin: 0 10px;
-    padding: 8px 16px;
-    background: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .controls button:disabled {
-    background: #c0c4cc;
-    cursor: not-allowed;
-  }
-  .section {
-    flex: 1;
-    margin-bottom: 12px;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-
-    h3 {
-      padding: 8px 12px;
-      background: #f5f7fa;
-      margin: 0;
-      border-bottom: 1px solid #e4e7ed;
-    }
-
-    .content-box {
-      text-align: left;
-      padding: 12px;
-      height: calc(100% - 42px);
-      overflow-y: auto;
-    }
-  }
-
-  .input-group {
-    display: flex;
-    gap: 12px;
-    margin-top: auto;
-    padding: 12px 0;
-
-    .input-field {
-      flex: 1;
-    }
-
-    .submit-btn {
-      width: 120px;
-    }
-  }
 }
 
-/*4. 右侧结果全文展示*/
-.result-container1 {
-  position: fixed;
-  left: 70%;
-  top: 60px;
-  width: 30%;
-  height: calc(100vh - 60px);
+/* 顶部导航栏样式 */
+.top-nav {
   display: flex;
-  flex-direction: column;
-  background: #f8f9fa;
-  border-left: 1px solid #e0e0e0;
-
-  .fulltext-scroll {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-
-    .translation-content {
-      white-space: pre-wrap;
-      line-height: 1.6;
-      text-align: left;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
-      padding: 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      .highlighted-text {
-        background-color: rgb(232, 232, 116); /* 高亮颜色 */
-        padding: 2px 4px; /* 增加文字可读性 */
-        border-radius: 3px; /* 圆角效果 */
-      }
-    }
-  }
-
-  .export-footer {
-    padding: 16px;
-    border-top: 1px solid #e0e0e0;
-    background: #fff;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
-  }
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
-/* 滚动条美化*/
-.fulltext-scroll::-webkit-scrollbar {
-  width: 8px;
-  background: #f1f1f1;
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
 }
 
-.fulltext-scroll::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+.pagination-controls {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0 16px;
+}
+
+.export-btn {
+  min-width: 120px;
+}
+
+/* 翻译内容区域样式 */
+.translation-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.translation-pair {
+  margin-bottom: 20px;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.3s;
+  border-bottom: 1px solid #3a42a5; /* 添加底部边框 */
+}
+
+/* 最后一项不显示分割线 */
+.translation-pair:last-child {
+  border-bottom: none;
+}
+
+.active-pair {
+  background-color: #f5f7fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.original-sentence, .translation-sentence {
+  margin-bottom: 12px;
+}
+
+.sentence-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sentence-number {
+  font-weight: bold;
+  color: #1890ff;
+  margin-right: 8px;
+}
+
+.sentence-label {
+  font-weight: 500;
+  color: #606266;
+  margin-right: 12px;
+}
+
+.edit-controls {
+  margin-left: auto;
+}
+
+.sentence-content {
+  padding: 12px;
+  background-color: #fff;
+  border: 1px solid #ebeef5;
   border-radius: 4px;
-  &:hover {
-    background: #a8a8a8;
-  }
+  line-height: 1.6;
+  min-height: 40px;
 }
+
+.sentence-editor {
+  padding: 0 12px;
+}
+
+/* memoryList.css */
+
+.memory-list-container {
+  padding: 16px;
+}
+
+.memory-item {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.index-number {
+  font-weight: bold;
+  color: #165DFF; /* 蓝色 */
+  margin-right: 8px;
+}
+
+.source-label, .translation-label {
+  font-weight: bold;
+  color: #333; /* 黑色 */
+  margin: 0 8px 4px 0;
+}
+
+.source-text, .translated-text {
+  margin: 4px 0 12px;
+  line-height: 1.5;
+}
+
+/* 自定义滚动条样式 */
+.translation-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.translation-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.translation-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.translation-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 </style>

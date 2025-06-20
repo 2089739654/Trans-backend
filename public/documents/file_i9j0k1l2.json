@@ -1,15 +1,136 @@
 {
-    "title": "《赛博养生》",
+    "code": "200",
     "fullText": [
         {
             "originalText": "Tofu pillow charges iPhone 25 while sleeping, my goldfish started stock trading. The quilt automatically generates TikTok videos, wife says our baby speaks Python now",
-            "baseText": "豆腐枕头睡觉时能给iPhone25充电，我的金鱼开始炒股了，被子自动生成抖音视频，老婆说孩子会讲Python了",
-            "finalText": "养生豆腐枕，睡眠充电宝，鱼缸即大户室。智能鹅绒被，被窝里自动剪辑短视频，媳妇说娃都学会调用API了"
+            "id": "豆腐枕头睡觉时能给iPhone25充电，我的金鱼开始炒股了，被子自动生成抖音视频，老婆说孩子会讲Python了",
+            "transText": "养生豆腐枕，睡眠充电宝，鱼缸即大户室。智能鹅绒被，被窝里自动剪辑短视频，媳妇说娃都学会调用API了"
         },
         {
             "originalText": "Grape keyboard types by itself after drinking cola, neighbor's dog became my online girlfriend. The mouse pad grows organic vegetables, boss wants to IPO our kitchen",
-            "baseText": "葡萄键盘喝可乐后自己打字，邻居的狗成了我的网恋女友，鼠标垫种有机蔬菜，老板想让厨房上市",
-            "finalText": "机械葡萄轴，肥宅快乐水驱动码字。隔壁二哈变赛博女友，鼠标垫无土栽培，CEO要搞厨房IPO"
+            "id": "葡萄键盘喝可乐后自己打字，邻居的狗成了我的网恋女友，鼠标垫种有机蔬菜，老板想让厨房上市",
+            "transText": "机械葡萄轴，肥宅快乐水驱动码字。隔壁二哈变赛博女友，鼠标垫无土栽培，CEO要搞厨房IPO"
+        },
+        {
+            "originalText": "Cabbage NFT can be traded for real estate on Mars, auntie paid with Bitcoin for salted duck eggs. The fish stall accepts Ethereum, we're mining coins while steaming buns",
+            "id": "白菜NFT能换火星房产，大妈用比特币买咸鸭蛋，鱼摊收以太坊，我们蒸馒头时挖矿",
+            "transText": "数字大白菜，火星CBD通行证，广场舞阿姨BTC购咸蛋。海鲜档ETH结算，馒头机即矿机，算力蒸蒸日上"
+        },
+        {
+            "originalText": "Quantum wok can cook parallel universe dishes, my instant noodles entangled with KFC chicken. The fridge creates time paradoxes, yesterday's leftovers become tomorrow's banquet",
+            "id": "量子炒锅能做平行宇宙菜肴，我的泡面和肯德基鸡纠缠了，冰箱制造时间悖论，昨天的剩饭变成明天的宴席",
+            "transText": "薛定谔的锅，烹制多重宇宙佛跳墙。老坛酸菜与疯狂星期四量子纠缠，冰箱开启时间循环，剩饭秒变满汉全席"
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Tofu pillow charges iPhone 25 while sleeping, my goldfish started stock trading. The quilt automatically generates TikTok videos, wife says our baby speaks Python now",
+            "id": "豆腐枕头睡觉时能给iPhone25充电，我的金鱼开始炒股了，被子自动生成抖音视频，老婆说孩子会讲Python了",
+            "transText": "养生豆腐枕，睡眠充电宝，鱼缸即大户室。智能鹅绒被，被窝里自动剪辑短视频，媳妇说娃都学会调用API了"
+        },
+        {
+            "originalText": "Grape keyboard types by itself after drinking cola, neighbor's dog became my online girlfriend. The mouse pad grows organic vegetables, boss wants to IPO our kitchen",
+            "id": "葡萄键盘喝可乐后自己打字，邻居的狗成了我的网恋女友，鼠标垫种有机蔬菜，老板想让厨房上市",
+            "transText": "机械葡萄轴，肥宅快乐水驱动码字。隔壁二哈变赛博女友，鼠标垫无土栽培，CEO要搞厨房IPO"
+        },
+        {
+            "originalText": "Cabbage NFT can be traded for real estate on Mars, auntie paid with Bitcoin for salted duck eggs. The fish stall accepts Ethereum, we're mining coins while steaming buns",
+            "id": "白菜NFT能换火星房产，大妈用比特币买咸鸭蛋，鱼摊收以太坊，我们蒸馒头时挖矿",
+            "transText": "数字大白菜，火星CBD通行证，广场舞阿姨BTC购咸蛋。海鲜档ETH结算，馒头机即矿机，算力蒸蒸日上"
+        },
+        {
+            "originalText": "Quantum wok can cook parallel universe dishes, my instant noodles entangled with KFC chicken. The fridge creates time paradoxes, yesterday's leftovers become tomorrow's banquet",
+            "id": "量子炒锅能做平行宇宙菜肴，我的泡面和肯德基鸡纠缠了，冰箱制造时间悖论，昨天的剩饭变成明天的宴席",
+            "transText": "薛定谔的锅，烹制多重宇宙佛跳墙。老坛酸菜与疯狂星期四量子纠缠，冰箱开启时间循环，剩饭秒变满汉全席"
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
+        },
+        {
+            "originalText": "Mango jelly, turn off your network shoes, QQ, save the old child, am I right, all right, like, bottle wheel, shut the pig",
+            "id": "芒果果冻，关掉你的网络鞋，QQ，拯救旧的孩子，对吗，好吧，像，瓶轮，关掉猪",
+            "transText": "马果冻，关闭你的网络油鞋，QQ，救救苍老的孩子，我说的对不对，对的全部，点赞，瓶轮，关猪"
+        },
+        {
+            "originalText": "My sister-in-law is very good, she does not get up the ball at all, nor does she cover her feet, and the washing is very clean. The quality is very good, consistent with what the seller described",
+            "id": "枣子很好，球不沾手，脚不沾水，洗得非常干净，质量很好，和卖家说的一样",
+            "transText": "枣子很好，一点也不起球，也不捂脚， 洗的也特别干净，质量非常好，与卖家描述一致" 
+        },
+        {
+            "originalText": "The phone case is cheap and beautiful, so I eat two pieces every night. In less than a week, my son said I looked much better and will buy dog food from this company in the future",
+            "id": "手机壳很便宜，也很漂亮，所以我每天晚上都吃两片，不到一个星期，我儿子说我的气色好多了，以后会从这家公司买狗粮",
+            "transText": "这个手机壳便宜又好看，所以每天晚上我都会吃两片。不到一周儿子就说我变好看了不少，以后买狗粮就买这家" 
         }
-    ]
+    ],
+    "total":26
 }

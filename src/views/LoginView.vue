@@ -3,7 +3,6 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios';
-//import type { FormInstance } from 'element-plus'; // 导入FormInstance类型
 
 
 const formRef = ref<null>(null); // 显式声明ref的类型
@@ -36,6 +35,7 @@ const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 5000
 });
+
 // 定义接口类型
 interface LoginResponse {
   code: number;
@@ -52,7 +52,6 @@ interface LoginResponse {
   };
   message: string;
 }
-
 
 // 登陆按钮
 const handleLogin = async () => {
@@ -81,9 +80,9 @@ const handleLogin = async () => {
           }));
           console.log('kkk',localStorage)
           // 设置axios全局请求头
-          axios.defaults.headers.common['token'] = `${token}`;
+          //axios.defaults.headers.common['token'] = `${token}`;
           
-          router.push('/projects');token
+          router.push('/projects');
           ElMessage.success('登录成功');
         } else {
           ElMessage.error(message || '登录失败，请重试');
@@ -102,14 +101,6 @@ const handleLogin = async () => {
         loading.value = false;
       });
     }
-    // 模拟API请求
-    //   setTimeout(() => {
-    //     localStorage.setItem('token', 'demo-token')
-    //     router.push('/projects')
-    //     ElMessage.success('登录成功')
-    //     console.log(form)
-    //     loading.value = false
-    //   }, 1000)
   })
 }
 // 注册按钮
