@@ -269,29 +269,33 @@ const getGlobalIndex = (pageIndex: number) => {
 // 导出全文
 const exportAllPages = async () => {
   try {
-    // 如果已经知道总页数，可以循环获取所有页数据
     let allContent = ''
     
-    for (let page = 1; page <= totalPages.value; page++) {
-      const response = await fetch(`/documents/${id}.json?page=${page}&size=${pageSize.value}`)
-      const jsonData = await response.json()
+    // 计算总页数（假设每页固定数量的句子）
+    const sentencesPerPage = pageSize.value || 10;
+    const totalPages = Math.ceil(pageSentences.value.length / sentencesPerPage);
+    
+    for (let page = 1; page <= totalPages; page++) {
+      // 获取当前页的句子
+      const startIdx = (page - 1) * sentencesPerPage;
+      const endIdx = Math.min(startIdx + sentencesPerPage, pageSentences.value.length);
+      const pageItems = pageSentences.value.slice(startIdx, endIdx);
       
-      const pageContent = jsonData.fullText.map((item: any, index: number) => {
-        const globalIndex = (page - 1) * pageSize.value + index + 1
-        const original = item.originalText
-        const translation = item.transText || '待翻译'
-        return `${globalIndex}. ${original}\n   → ${translation}`
-      }).join('\n\n')
+      const pageContent = pageItems.map((item, index) => {
+        const globalIndex = startIdx + index + 1;
+        const original = item.originalText;
+        const translation = item.transText || '待翻译';
+        return `${globalIndex}. ${original}\n   → ${translation}`;
+      }).join('\n\n');
       
-      allContent += `\n\n===== 第${page}页 =====\n\n` + pageContent
+      allContent += `\n\n===== 第${page}页 =====\n\n` + pageContent;
     }
     
-    downloadFile(`translation_full.txt`, allContent.trim())
+    downloadFile(`translation_full.txt`, allContent.trim());
   } catch (error) {
-    console.error("导出全文失败:", error)
-    // 可以考虑使用不分页的API获取全文
+    console.error("导出全文失败:", error);
   }
-}
+};
 
 // 下载文件辅助函数
 const downloadFile = (filename: string, content: string) => {

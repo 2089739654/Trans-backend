@@ -184,13 +184,69 @@ import { computed, onMounted, onBeforeUnmount } from "vue";
 import { Search } from "@element-plus/icons-vue";
 // 示例可以查询的所有数据
 const findData = ref([
-  { id: 1, source: "Hypertension", trans: "高血压" },
-  { id: 2, source: "Cloud Computing", trans: "云计算" },
-  { id: 3, source: "Force Majeure", trans: "不可抗力" },
-  { id: 4, source: "Artificial Intelligence", trans: "人工智能" },
-  { id: 5, source: "Sustainability", trans: "持续可能性" },
-  { id: 6, source: "Blockchain", trans: "区块链" },
-  { id: 7, source: "Quantum Computing", trans: "量子计算" },
+    {
+      "id": 1,
+      "source": "The doctor prescribed medication for his hypertension.",
+      "trans": "医生为他的高血压开了药。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-001",
+      "fileName": "医学场景例句集"
+    },
+    {
+      "id": 2,
+      "source": "Many companies are adopting cloud computing for data management.",
+      "trans": "许多公司正采用云计算进行数据管理。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-002",
+      "fileName": "信息技术场景例句"
+    },
+    {
+      "id": 3,
+      "source": "The contract was terminated due to force majeure circumstances.",
+      "trans": "合同因不可抗力因素而终止。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-003",
+      "fileName": "法律场景例句库"
+    },
+    {
+      "id": 4,
+      "source": "Artificial intelligence is transforming the healthcare industry.",
+      "trans": "人工智能正在改变医疗保健行业。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-004",
+      "fileName": "科技应用场景例句"
+    },
+    {
+      "id": 5,
+      "source": "Sustainability practices are essential for environmental protection.",
+      "trans": "可持续发展实践对环境保护至关重要。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-005",
+      "fileName": "环保场景例句集"
+    },
+    {
+      "id": 6,
+      "source": "Blockchain technology ensures transparency in financial transactions.",
+      "trans": "区块链技术确保金融交易的透明度。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-006",
+      "fileName": "金融科技场景例句"
+    },
+    {
+      "id": 7,
+      "source": "Scientists are researching quantum computing for faster calculations.",
+      "trans": "科学家正在研究量子计算以实现更快的计算。",
+      "createTime": "2020-09-12",
+      "lastTime": "2020-09-12",
+      "fileId": "FILE-007",
+      "fileName": "物理科技场景例句集"
+    }
 ]);
 
 // 搜索相关状态
@@ -200,7 +256,7 @@ let scrollInterval: number | null | undefined = null;
 
 // 过滤后的查询到的数据
 const filteredData = computed(() => {
-  return findData.value.filter(
+  return tableData.value.filter(
     (item:any) =>
       item.source.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       item.trans.toLowerCase().includes(searchQuery.value.toLowerCase())

@@ -1,58 +1,65 @@
 [
     {
       "id": 1,
-      "source": "Hypertensifsfsdgtmvfhkddsvfkjsddfbkjsgon",
-      "trans": "高血efnlksgnlkkgbsjlgbljsbgjbgjbsjgbj压",
+      "source": "The doctor prescribed medication for his hypertension.",
+      "trans": "医生为他的高血压开了药。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "已审核"
+      "fileId": "FILE-001",
+      "fileName": "医学场景例句集"
     },
     {
       "id": 2,
-      "source": "Cloud Cdsgmksnglkdnlergerjgbjdfgjkomputing",
-      "trans": "云计dgs  nlj nslkgnxn. xm lndgklhkhgog算",
+      "source": "Many companies are adopting cloud computing for data management.",
+      "trans": "许多公司正采用云计算进行数据管理。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "待审核"
+      "fileId": "FILE-002",
+      "fileName": "信息技术场景例句"
     },
     {
       "id": 3,
-      "source": "Forcegrrengjkrnekgnrklngklrrnkgr Majeure",
-      "trans": "不可抗mg;ndmgknkdngknkngknfkgnkflnkhnf力",
+      "source": "The contract was terminated due to force majeure circumstances.",
+      "trans": "合同因不可抗力因素而终止。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "已审核"
+      "fileId": "FILE-003",
+      "fileName": "法律场景例句库"
     },
     {
       "id": 4,
-      "source": "Artificialkgppljregljropjgopojrpgojropjgoprjprjgoprj Intelligence",
-      "trans": "人工智gggggggggggggdddddggd,ng,dngnkdglglkkslglr能",
+      "source": "Artificial intelligence is transforming the healthcare industry.",
+      "trans": "人工智能正在改变医疗保健行业。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "已审核"
+      "fileId": "FILE-004",
+      "fileName": "科技应用场景例句"
     },
     {
       "id": 5,
-      "source": "Sustaindghjhjhjgfjjgfjbgjbfjgbjfbgjfbgjbability",
-      "trans": "持续可gggggggggggggggggggg能ghghgggjgjgugu性",
+      "source": "Sustainability practices are essential for environmental protection.",
+      "trans": "可持续发展实践对环境保护至关重要。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "待审核"
+      "fileId": "FILE-005",
+      "fileName": "环保场景例句集"
     },
     {
       "id": 6,
-      "source": "Blockchhglkdhglkfhglkhddlkhglkaggggggggggggggggggggggggggggggggggggggggggggggggggggggggin",
-      "trans": "区块gggggggggggggggggggggggggggggggggg链",
+      "source": "Blockchain technology ensures transparency in financial transactions.",
+      "trans": "区块链技术确保金融交易的透明度。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "已审核"
+      "fileId": "FILE-006",
+      "fileName": "金融科技场景例句"
     },
     {
       "id": 7,
-      "source": "Quantum Cgnkldnlkgnkldnglndgjdlkgfhlkkkkomputing",
-      "trans": "量子计ggggggggggggggggggggggg算",
+      "source": "Scientists are researching quantum computing for faster calculations.",
+      "trans": "科学家正在研究量子计算以实现更快的计算。",
       "createTime": "2020-09-12",
       "lastTime": "2020-09-12",
-      "status": "待审核"
+      "fileId": "FILE-007",
+      "fileName": "物理科技场景例句集"
     }
   ]
