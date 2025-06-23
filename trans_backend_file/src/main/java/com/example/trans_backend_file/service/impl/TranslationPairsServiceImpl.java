@@ -58,6 +58,7 @@ public class TranslationPairsServiceImpl extends ServiceImpl<TranslationPairsMap
         ThrowUtils.throwIf(currentPage == null , ErrorCode.PARAMS_ERROR);
         QueryWrapper<TranslationPairs> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("file_id", fileId);
+        queryWrapper.orderByAsc("position");
         Page<TranslationPairs> translationPairsPage=new Page<>(currentPage,size);
         Page<TranslationPairs> translationPairsPage1 = baseMapper.selectPage(translationPairsPage, queryWrapper);
         return translationPairsPage1.getRecords();

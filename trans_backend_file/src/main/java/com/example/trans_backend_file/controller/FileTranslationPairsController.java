@@ -25,7 +25,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 @RestController
@@ -48,7 +53,6 @@ public class FileTranslationPairsController {
     @Lazy
     private FileService fileService;
 
-
     @PostMapping("/getTransTextCount")
     public BaseResponse<Integer> getTransTextCount(Long fileId){
         ThrowUtils.throwIf(fileId == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
@@ -56,7 +60,6 @@ public class FileTranslationPairsController {
         ThrowUtils.throwIf(count == null, ErrorCode.SYSTEM_ERROR, "获取翻译文本数量失败");
         return ResultUtils.success(count);
     }
-
 
 
     @PostMapping("/getTransText")

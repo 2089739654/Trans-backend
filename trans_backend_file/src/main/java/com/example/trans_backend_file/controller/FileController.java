@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 public class FileController {
@@ -30,7 +31,7 @@ public class FileController {
     private FileService fileService;
     @Resource
     private ApplicationContext applicationContext;
-
+    //todo 文件上传的幂等性保证
     @PostMapping("/upload")
     public BaseResponse<Long> uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "projectId") Long projectId) {
         ThrowUtils.throwIf(file==null,ErrorCode.PARAMS_ERROR);
@@ -40,7 +41,6 @@ public class FileController {
     }
 
 
-    //todo 逻辑错误
     @GetMapping("/selectFiles")
     public BaseResponse<List<File>> selectAllFiles(Long projectId){
         List<File> files = fileService.selectAll(projectId);
