@@ -6,7 +6,9 @@ import lombok.Getter;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -15,41 +17,46 @@ import java.util.stream.Collectors;
 public class WebSocketSessionContext {
 
     //可改为set todo
-    private static final ConcurrentHashMap<Long, List<SessionHolder>> sessionMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Set<SessionHolder>> sessionMap = new ConcurrentHashMap<>();
 
     private static final ConcurrentHashMap<String,SessionHolder> sessionIdMap = new ConcurrentHashMap<>();
 
     public static void addSession(Long groupId, WebSocketSession webSocketSession, User user) {
         LockManager.writeLock(groupId);
-        List<SessionHolder> list = sessionMap.getOrDefault(groupId, new ArrayList<>());
-        list.add(new SessionHolder(webSocketSession, user));
-        sessionMap.put(groupId,list);
+        Set<SessionHolder> set = sessionMap.getOrDefault(groupId, new HashSet<>());
+        set.add(new SessionHolder(webSocketSession, user));
+        sessionMap.put(groupId,set);
         LockManager.writeUnlock(groupId);
         sessionIdMap.put(webSocketSession.getId(), new SessionHolder(webSocketSession, user));
     }
 
     public static List<WebSocketSession> getSession(Long groupId,WebSocketSession webSocketSession) {
         LockManager.readLock(groupId);
-        List<SessionHolder> list = sessionMap.get(groupId);
-        LockManager.readUnlock(groupId);
-        List<WebSocketSession> collect = list.stream().map(SessionHolder::getWebSocketSession).filter(m -> m != webSocketSession).collect(Collectors.toList());
-        return collect;
+        Set<SessionHolder> set;
+        try {
+            set = sessionMap.get(groupId);
+        } finally {
+            LockManager.readUnlock(groupId);
+        }
+        return set.stream().map(SessionHolder::getWebSocketSession).filter(m -> m != webSocketSession).collect(Collectors.toList());
     }
 
 
     public static void removeSession(Long groupId, WebSocketSession webSocketSession) {
+        Set<SessionHolder> set = sessionMap.get(groupId);
+        if (set == null) {
+            return; // 如果没有对应的会话集合，直接返回
+        }
         LockManager.writeLock(groupId);
-        List<SessionHolder> list = sessionMap.get(groupId);
-        if (list != null) {
-            list.removeIf(sessionHolder -> sessionHolder.getWebSocketSession().equals(webSocketSession));
-            if (list.isEmpty()) {
+        try {
+            set.removeIf(sessionHolder -> sessionHolder.getWebSocketSession().equals(webSocketSession));
+            if (set.isEmpty()) {
                 sessionMap.remove(groupId);
                 LockManager.removeLock(groupId);
-            } else {
-                sessionMap.put(groupId, list);
             }
+        } finally {
+            LockManager.writeUnlock(groupId);
         }
-        LockManager.writeUnlock(groupId);
         sessionIdMap.remove(webSocketSession.getId());
     }
 

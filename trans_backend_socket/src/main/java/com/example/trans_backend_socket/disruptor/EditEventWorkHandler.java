@@ -22,6 +22,11 @@ public class EditEventWorkHandler implements WorkHandler<DisruptorEvent> {
     public void onEvent(DisruptorEvent event) throws Exception {
         TextEditMessage textEditMessage = event.getTextEditMessage();
         EditEnums type = EditEnums.getByType(textEditMessage.getType());
+        if(type == null){
+            // 如果类型不合法，直接返回错误
+            webSocketHandler.handleErrorMessage();
+            return;
+        }
         Long groupId = event.getGroupId();
         WebSocketSession webSocketSession = event.getWebSocketSession();
         switch (type) {
@@ -36,7 +41,7 @@ public class EditEventWorkHandler implements WorkHandler<DisruptorEvent> {
                 break;
             default:
                 // 其他消息类型，返回错误提示
-                webSocketHandler.handleErrorMessage("消息类型错误");
+                webSocketHandler.handleErrorMessage();
                 break;
         }
 

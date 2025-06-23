@@ -4,6 +4,7 @@ import com.example.trans_backend_socket.entity.DisruptorEvent;
 import com.example.trans_backend_socket.entity.TextEditMessage;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -15,6 +16,7 @@ public class EditEventWorkProducer {
 
 
     @Resource
+    @Lazy
     private Disruptor<DisruptorEvent> disruptor;
 
     public void publishEvent(TextEditMessage textEditMessage, WebSocketSession webSocketSession,Long groupId){
