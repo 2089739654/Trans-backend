@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.server.ServerEndpointConfig;
 
-@Component // 将此 Configurator 声明为 Spring Bean，以便 Spring 注入 ApplicationContext
+//@Component // 将此 Configurator 声明为 Spring Bean，以便 Spring 注入 ApplicationContext
 public class SpringBeanServerEndpointConfigurator extends ServerEndpointConfig.Configurator implements ApplicationContextAware {
 
     private static ApplicationContext context;

@@ -5,7 +5,8 @@ build/
 
 application-local.yml
 
-user.txt
-**/*Test.java
-
 .idea/
+**/*Test.java
+**/*Tests.java
+
+user.txt

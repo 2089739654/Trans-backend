@@ -32,4 +32,6 @@ public class Project {
      * 
      */
     private Date createTime;
+
+    private Long groupId;
 }
