@@ -14,6 +14,7 @@ import com.example.trans_backend_socket.processor.ProcessorChain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -28,6 +29,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Resource
     private ProcessorChain processorChain;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
 
     @Resource

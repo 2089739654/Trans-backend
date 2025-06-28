@@ -10,32 +10,26 @@ import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.manager.TranslationManager;
 import com.example.trans_backend_file.model.dto.*;
 import com.example.trans_backend_file.model.entity.File;
+import com.example.trans_backend_file.model.entity.TeamTransPairs;
 import com.example.trans_backend_file.model.entity.TranslationPairs;
 import com.example.trans_backend_file.model.entity.TranslationPairsHistory;
 import com.example.trans_backend_file.model.vo.SelectTransPairsVo;
-import com.example.trans_backend_file.service.ElasticsearchService;
-import com.example.trans_backend_file.service.FileService;
-import com.example.trans_backend_file.service.TranslationPairsHistoryService;
-import com.example.trans_backend_file.service.TranslationPairsService;
+import com.example.trans_backend_file.service.*;
 import lombok.Getter;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 @RestController
 public class FileTranslationPairsController {
 
+    @Resource
+    private TeamTransPairsService teamTransPairsService;
 
     @Resource
     private ElasticsearchService elasticsearchService;
@@ -75,6 +69,15 @@ public class FileTranslationPairsController {
                 selectTransTextRequest.getFileId());
         return ResultUtils.success(translationPairs);
     }
+
+    @PostMapping("/getTeamTransText")
+    public BaseResponse<List<TeamTransPairs>> getTeamTransText(@RequestBody SelectTransTextRequest selectTransTextRequest){
+        List<TeamTransPairs> transPairs = teamTransPairsService.getTransPairs(selectTransTextRequest.getSize(),
+                selectTransTextRequest.getCurrentPage(),
+                selectTransTextRequest.getFileId());
+        return ResultUtils.success( transPairs);
+    }
+
 
     @PostMapping("/saveTransText")
     public BaseResponse<String> saveTransText(@RequestBody SaveTransTextRequest saveTransTextRequest){

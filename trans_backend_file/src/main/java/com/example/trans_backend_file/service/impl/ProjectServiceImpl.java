@@ -47,10 +47,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     @Override
-    public Project create(Long userId, String name) {
+    public Project create(Long userId, String name,Long groupId) {
         Project project = new Project();
         project.setUserId(userId);
         project.setName(name);
+        if(groupId!=null)project.setGroupId(groupId);
         boolean save = save(project);
         if(save){
             return project;

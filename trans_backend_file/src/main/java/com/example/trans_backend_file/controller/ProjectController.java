@@ -49,8 +49,8 @@ public class ProjectController {
      */
     @PostMapping("/insert")
     @ApiOperation(value = "创建成功返回项目ID，失败则返回errorcode")
-    public BaseResponse<?> createProject( String name){
-        Project project = projectService.create(BaseContext.getUser().getId(), name);
+    public BaseResponse<?> createProject( String name,Long groupId){
+        Project project = projectService.create(BaseContext.getUser().getId(), name,groupId);
         if(project!=null){
             return ResultUtils.success(project.getId());
         }else{
