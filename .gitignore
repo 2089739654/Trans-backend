@@ -7,3 +7,5 @@ application-local.yml
 
 user.txt
 **/*Test.java
+
+.idea/
