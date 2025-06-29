@@ -17,7 +17,7 @@ import java.util.List;
 */
 public interface FileService extends IService<File> {
 
-    Long upload(MultipartFile file, Long projectId);
+    Long upload(MultipartFile file, Long projectId,Long groupId);
 
 
     void export(Long fileId, HttpServletResponse response);

@@ -15,4 +15,7 @@ public interface ProjectService extends IService<Project> {
     Project create(Long userId,String name,Long groupId);
     boolean update(Long projectId,String name);
     boolean delete(Long projectId);
+
+    List<Project> getProjectsByGroupId(Long groupId);
+
 }

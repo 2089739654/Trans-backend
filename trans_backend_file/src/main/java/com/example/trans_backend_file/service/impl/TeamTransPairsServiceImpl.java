@@ -2,8 +2,10 @@ package com.example.trans_backend_file.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.trans_backend_file.model.entity.SaveMessage;
 import com.example.trans_backend_file.model.entity.TeamTransPairs;
 import com.example.trans_backend_file.service.TeamTransPairsService;
 import com.example.trans_backend_file.mapper.TeamTransPairsMapper;
@@ -57,6 +59,20 @@ public class TeamTransPairsServiceImpl extends ServiceImpl<TeamTransPairsMapper,
         return objects.stream().map(
                 obj -> JSONUtil.toBean((String) obj, TeamTransPairs.class)
         ).sorted(Comparator.comparingInt(TeamTransPairs::getPosition)).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean trySave(SaveMessage saveMessage) {
+        Long transId = saveMessage.getTransId();
+        Long timestamp = saveMessage.getTimestamp();
+        String transText = saveMessage.getTransText();
+        Long userId = saveMessage.getUserId();
+        UpdateWrapper<TeamTransPairs> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id",transId);
+        updateWrapper.ge("timestamp", timestamp);
+        updateWrapper.set("translated_text", transText);
+        updateWrapper.set("editor_id", userId);
+        return this.update(updateWrapper);
     }
 }
 

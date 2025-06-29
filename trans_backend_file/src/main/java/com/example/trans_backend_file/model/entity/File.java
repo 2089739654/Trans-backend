@@ -62,4 +62,6 @@ public class File {
     private String lngType;
 
     private Long projectId;
+
+    private Long groupId;
 }

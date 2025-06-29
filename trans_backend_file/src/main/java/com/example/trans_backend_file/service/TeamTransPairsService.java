@@ -1,5 +1,6 @@
 package com.example.trans_backend_file.service;
 
+import com.example.trans_backend_file.model.entity.SaveMessage;
 import com.example.trans_backend_file.model.entity.TeamTransPairs;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,5 +14,7 @@ import java.util.List;
 public interface TeamTransPairsService extends IService<TeamTransPairs> {
 
     List<TeamTransPairs> getTransPairs(Integer size, Integer page,Long fileId);
+
+    boolean trySave(SaveMessage saveMessage);
 
 }

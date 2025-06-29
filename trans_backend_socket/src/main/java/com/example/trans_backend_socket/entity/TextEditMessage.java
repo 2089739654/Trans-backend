@@ -2,7 +2,10 @@ package com.example.trans_backend_socket.entity;
 
 
 import com.example.trans_backend_common.entity.User;
+import com.example.trans_backend_file.model.entity.TeamTransPairs;
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class TextEditMessage {
@@ -14,9 +17,15 @@ public class TextEditMessage {
 
     private Long fileId; // 文件ID
 
+    private Integer position;
+
     private Long transId;
 
     private String transText;
+
+    private String sourceText;
+
+    private Long timestamp; // 时间戳
 
 
 }

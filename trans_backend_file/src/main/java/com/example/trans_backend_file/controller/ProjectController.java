@@ -1,6 +1,5 @@
 package com.example.trans_backend_file.controller;
 
-import com.aspose.pdf.operators.Re;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.common.ResultUtils;
 import com.example.trans_backend_common.context.BaseContext;
@@ -38,8 +37,13 @@ public class ProjectController {
     @GetMapping("/projects")
     public BaseResponse<List<Project>> allProjects(){
         List<Project> projects = projectService.selectListById(BaseContext.getUser().getId());
-        ThrowUtils.throwIf(projects==null,ErrorCode.PARAMS_ERROR);
-        return ResultUtils.success(projectService.selectListById(BaseContext.getUser().getId()));
+        return ResultUtils.success(projects);
+    }
+
+    @GetMapping("/getProjectsByUserId")
+    public BaseResponse<List<Project>> getProjectsByGroupId(Long groupId){
+        List<Project> projectsByGroupId = projectService.getProjectsByGroupId(groupId);
+        return ResultUtils.success(projectsByGroupId);
     }
 
     /**
