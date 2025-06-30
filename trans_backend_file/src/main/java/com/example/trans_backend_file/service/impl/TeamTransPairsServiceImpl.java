@@ -37,10 +37,12 @@ public class TeamTransPairsServiceImpl extends ServiceImpl<TeamTransPairsMapper,
     public List<TeamTransPairs> getTransPairs(Integer size, Integer page, Long fileId) {
         int start = (page - 1) * size;
         int end = start + size;
+
         List<Object> list=new ArrayList<>();
         // 生成位置列表
         for (int i = start+1; i <= end ; i++) {
-            list.add(i);
+            String tmp= String.valueOf(i);
+            list.add(tmp);
         }
         String key="file:"+fileId;
         List<Object> objects = stringRedisTemplate.opsForHash().multiGet(key, list);
@@ -73,6 +75,14 @@ public class TeamTransPairsServiceImpl extends ServiceImpl<TeamTransPairsMapper,
         updateWrapper.set("translated_text", transText);
         updateWrapper.set("editor_id", userId);
         return this.update(updateWrapper);
+    }
+
+    @Override
+    public Integer getTransTextCount(Long fileId) {
+        QueryWrapper<TeamTransPairs> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("file_id", fileId);
+        long l = baseMapper.selectCount(queryWrapper);
+        return (Integer) (int)l;
     }
 }
 

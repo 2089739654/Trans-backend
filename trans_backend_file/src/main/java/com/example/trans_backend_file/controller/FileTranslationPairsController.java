@@ -55,6 +55,14 @@ public class FileTranslationPairsController {
         return ResultUtils.success(count);
     }
 
+    @PostMapping("/getTeamTransTextCount")
+    public BaseResponse<Integer> getTeamTransTextCount(Long fileId){
+        ThrowUtils.throwIf(fileId == null, ErrorCode.PARAMS_ERROR, "fileId不能为空");
+        Integer count = teamTransPairsService.getTransTextCount(fileId);
+        ThrowUtils.throwIf(count == null, ErrorCode.SYSTEM_ERROR, "获取团队翻译文本数量失败");
+        return ResultUtils.success(count);
+    }
+
 
     @PostMapping("/getTransText")
     @ResourceCheck(checkResource = "#selectTransTextRequest.fileId",resourceType = ResourceTypeEnum.FILE)

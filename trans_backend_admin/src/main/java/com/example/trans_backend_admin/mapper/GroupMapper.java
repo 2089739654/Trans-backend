@@ -2,6 +2,9 @@ package com.example.trans_backend_admin.mapper;
 
 import com.example.trans_backend_admin.model.entity.Group;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.trans_backend_common.entity.User;
+
+import java.util.List;
 
 /**
 * @author 20897
@@ -11,6 +14,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface GroupMapper extends BaseMapper<Group> {
 
+    List<Group> getGroupByUserId(Long userId);
+
+    List<User> getUserByGroupId(Long groupId);
 }
 
 

@@ -15,7 +15,7 @@ public class AuthProcessor extends Processor {
         User user = JSONUtil.toBean(token, User.class);
         String path = Objects.requireNonNull(webSocketSession.getUri()).toString();
         Long groupId = null;
-        groupId = Long.valueOf(path.substring(path.lastIndexOf("?") + 1+"groupId=".length()));
+        groupId = Long.valueOf(path.substring(path.lastIndexOf("&") + 1+"groupId=".length()));
         WebSocketSessionContext.addSession(groupId, webSocketSession, user);
     }
 }

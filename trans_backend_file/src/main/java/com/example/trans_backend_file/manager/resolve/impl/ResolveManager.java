@@ -17,6 +17,7 @@ import com.example.trans_backend_file.service.TranslationPairsService;
 import com.example.trans_backend_file.util.MinioUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
@@ -45,6 +46,9 @@ public abstract class ResolveManager implements ResolveService {
     private StringRedisTemplate stringRedisTemplate;
 
 
+    @Resource
+    private TransactionTemplate transactionTemplate;
+
     public final void resolve(File file){
         //获取文件流
         InputStream inputStream = MinioUtil.getFileStream(file);
@@ -57,36 +61,47 @@ public abstract class ResolveManager implements ResolveService {
         }
         //存储元数据
         int len=result.size();
-        if(file.getGroupId()==null){
-            List<TranslationPairs> list=new ArrayList<>();
-            for (int i=0;i<len;i++){
-                TranslationPairs translationPairs=new TranslationPairs();
-                translationPairs.setSourceText(result.get(i));
-                translationPairs.setFileId(file.getId());
-                translationPairs.setPosition(i+1);
-                list.add(translationPairs);
+
+        List<String> finalResult = result;
+        transactionTemplate.execute(status -> {
+            try {
+                if(file.getGroupId()==null){
+                    List<TranslationPairs> list=new ArrayList<>();
+                    for (int i=0;i<len;i++){
+                        TranslationPairs translationPairs=new TranslationPairs();
+                        translationPairs.setSourceText(finalResult.get(i));
+                        translationPairs.setFileId(file.getId());
+                        translationPairs.setPosition(i+1);
+                        list.add(translationPairs);
+                    }
+                    boolean res = translationPairsService.saveBatch(list, list.size());
+                    ThrowUtils.throwIf(!res, ErrorCode.SYSTEM_ERROR, "存储元数据失败");
+                }else {
+                    //如果是团队项目，则存储到团队翻译对中
+                    List<TeamTransPairs> list=new ArrayList<>();
+                    for (int i = 0; i < len; i++) {
+                        TeamTransPairs teamTransPairs = new TeamTransPairs();
+                        teamTransPairs.setSourceText(finalResult.get(i));
+                        teamTransPairs.setFileId(file.getId());
+                        teamTransPairs.setPosition(i + 1);
+                        teamTransPairs.setEditorId(file.getUserId());
+                        teamTransPairs.setTimestamp(0L);
+                        list.add(teamTransPairs);
+                    }
+                    boolean res = teamTransPairsService.saveBatch(list, list.size());
+                    ThrowUtils.throwIf(!res, ErrorCode.SYSTEM_ERROR, "存储元数据失败");
+                    //存redis 构建缓存
+                    String key= "file:" + file.getId();
+                    stringRedisTemplate.opsForHash().putAll(key,list.stream().collect(Collectors.toMap(q->q.getPosition().toString(), JSONUtil::toJsonStr)));
+                    stringRedisTemplate.expire(key, 3, TimeUnit.DAYS); // 设置过期时间为3天
+                }
+            } catch (Exception e) {
+                status.setRollbackOnly();
+                throw new RuntimeException(e);
             }
-            boolean res = translationPairsService.saveBatch(list, list.size());
-            ThrowUtils.throwIf(!res, ErrorCode.SYSTEM_ERROR, "存储元数据失败");
-        }else {
-            //如果是团队项目，则存储到团队翻译对中
-            List<TeamTransPairs> list=new ArrayList<>();
-            for (int i = 0; i < len; i++) {
-                TeamTransPairs teamTransPairs = new TeamTransPairs();
-                teamTransPairs.setSourceText(result.get(i));
-                teamTransPairs.setFileId(file.getId());
-                teamTransPairs.setPosition(i + 1);
-                teamTransPairs.setEditorId(file.getUserId());
-                teamTransPairs.setTimestamp(0L);
-                list.add(teamTransPairs);
-            }
-            boolean res = teamTransPairsService.saveBatch(list, list.size());
-            ThrowUtils.throwIf(!res, ErrorCode.SYSTEM_ERROR, "存储元数据失败");
-            //存redis 构建缓存
-            String key= "file:" + file.getId();
-            stringRedisTemplate.opsForHash().putAll(key,list.stream().collect(Collectors.toMap(TeamTransPairs::getPosition, JSONUtil::toJsonStr)));
-            stringRedisTemplate.expire(key, 3, TimeUnit.DAYS); // 设置过期时间为3天
-        }
+            return null;
+        });
+
 
     }
 

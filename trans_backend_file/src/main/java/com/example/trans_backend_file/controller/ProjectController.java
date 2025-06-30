@@ -40,7 +40,7 @@ public class ProjectController {
         return ResultUtils.success(projects);
     }
 
-    @GetMapping("/getProjectsByUserId")
+    @GetMapping("/getProjectByGroupId")
     public BaseResponse<List<Project>> getProjectsByGroupId(Long groupId){
         List<Project> projectsByGroupId = projectService.getProjectsByGroupId(groupId);
         return ResultUtils.success(projectsByGroupId);
@@ -53,7 +53,7 @@ public class ProjectController {
      */
     @PostMapping("/insert")
     @ApiOperation(value = "创建成功返回项目ID，失败则返回errorcode")
-    public BaseResponse<?> createProject( String name,Long groupId){
+    public BaseResponse<?> createProject(String name,Long groupId){
         Project project = projectService.create(BaseContext.getUser().getId(), name,groupId);
         if(project!=null){
             return ResultUtils.success(project.getId());
@@ -89,5 +89,7 @@ public class ProjectController {
             return ResultUtils.error(ErrorCode.PROJECT_DELETE_ERROR);
         }
     }
+
+
 
 }

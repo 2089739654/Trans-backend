@@ -17,4 +17,6 @@ public interface TeamTransPairsService extends IService<TeamTransPairs> {
 
     boolean trySave(SaveMessage saveMessage);
 
+    Integer getTransTextCount(Long fileId);
+
 }

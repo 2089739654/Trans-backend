@@ -12,7 +12,7 @@ import java.util.Date;
  * 
  * @TableName group
  */
-@TableName(value ="group")
+@TableName(value ="group_")
 @Data
 public class Group {
     /**

@@ -15,4 +15,7 @@ public interface UserService extends IService<User> {
     User userRegister(String userAccount, String userPassword, String userName);
 
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    void updateName(String name);
+
 }

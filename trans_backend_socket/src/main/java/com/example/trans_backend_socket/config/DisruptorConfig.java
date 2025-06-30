@@ -3,6 +3,7 @@ package com.example.trans_backend_socket.config;
 import cn.hutool.core.thread.ThreadFactoryBuilder;
 import com.example.trans_backend_socket.disruptor.EditEventWorkHandler;
 import com.example.trans_backend_socket.entity.DisruptorEvent;
+import com.example.trans_backend_socket.socket.WebSocketHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,9 @@ import javax.annotation.Resource;
 public class DisruptorConfig {
 
     @Resource
-    private EditEventWorkHandler editEventWorkHandler;
+    private WebSocketHandler webSocketHandler;
+
+
 
     @Bean
     public Disruptor<DisruptorEvent> disruptor() {
@@ -26,8 +29,12 @@ public class DisruptorConfig {
                 ThreadFactoryBuilder.create().setNamePrefix("disruptorEventDisruptor").build()
         );
         // 启动 disruptor
+        disruptor.handleEventsWithWorkerPool(
+                new EditEventWorkHandler(webSocketHandler),
+                new EditEventWorkHandler(webSocketHandler),
+                new EditEventWorkHandler(webSocketHandler));
         disruptor.start();
-        disruptor.handleEventsWithWorkerPool(editEventWorkHandler);
+
         return disruptor;
     }
 

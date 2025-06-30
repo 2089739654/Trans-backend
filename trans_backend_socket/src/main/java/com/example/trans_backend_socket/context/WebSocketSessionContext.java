@@ -21,6 +21,10 @@ public class WebSocketSessionContext {
 
     private static final ConcurrentHashMap<String,SessionHolder> sessionIdMap = new ConcurrentHashMap<>();
 
+
+    public static ConcurrentHashMap<Long, Set<SessionHolder>> getSessionMap() {
+        return sessionMap;
+    }
     public static void addSession(Long groupId, WebSocketSession webSocketSession, User user) {
         LockManager.writeLock(groupId);
         Set<SessionHolder> set = sessionMap.getOrDefault(groupId, new HashSet<>());
@@ -44,6 +48,7 @@ public class WebSocketSessionContext {
 
     public static void removeSession(Long groupId, WebSocketSession webSocketSession) {
         Set<SessionHolder> set = sessionMap.get(groupId);
+        boolean flag=false;
         if (set == null) {
             return; // 如果没有对应的会话集合，直接返回
         }
@@ -52,10 +57,12 @@ public class WebSocketSessionContext {
             set.removeIf(sessionHolder -> sessionHolder.getWebSocketSession().equals(webSocketSession));
             if (set.isEmpty()) {
                 sessionMap.remove(groupId);
+                LockManager.writeUnlock(groupId);
                 LockManager.removeLock(groupId);
+                flag=true;
             }
         } finally {
-            LockManager.writeUnlock(groupId);
+            if(!flag) LockManager.writeUnlock(groupId);
         }
         sessionIdMap.remove(webSocketSession.getId());
     }
