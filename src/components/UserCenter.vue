@@ -4,7 +4,8 @@
     <!-- 头像展示 -->
     <div class="avatar-wrapper">
       <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"/>
-      <span class="username">测试用户</span>
+      <span class="username">{{parsedUserInfo.userName}}</span>
+      <span class="username">{{parsedUserInfo.id}}</span>
     </div>
     
     <!-- 下拉菜单 -->
@@ -24,20 +25,37 @@
 <script setup lang="ts">
     import { User, SwitchButton } from '@element-plus/icons-vue'
     import { useRouter } from 'vue-router'
+    // import { useUserStore } from '@/stores/user';
+    // const userStore = useUserStore()
+    // const userInfo = userStore.getUserInfo
+    interface UserInfo {
+      id: string;
+      userName: string;
+      userAccount: string;
+    }
+
+    // 2. 修正类型断言的语法
+    const userInfo = localStorage.getItem('user');
+    const parsedUserInfo: UserInfo = userInfo 
+      ? JSON.parse(userInfo) 
+      : null;
+    // const userInfo = localStorage.getItem('user')
+    console.log('用户：',userInfo,parsedUserInfo)
+
     const router = useRouter()
     // 个人中心
     const goProfile = () => router.push('/personal')
     const handleLogout = () => {
-    //   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning'
-    //   }).then(() => {
-        //userStore.logout()
+      ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // authStore.logout()
+        localStorage.setItem('token', '');
         router.replace('/login')
-    //   })
+      })
     }
-
 </script>
 
 <style scoped>

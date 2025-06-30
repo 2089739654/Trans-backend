@@ -36,6 +36,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TreeNode: typeof import('./components/TreeNode.vue')['default']
     UserCenter: typeof import('./components/UserCenter.vue')['default']
+    UserList: typeof import('./components/UserList.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

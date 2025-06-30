@@ -1,57 +1,41 @@
 <script setup lang="ts">
   const projectName = "辅助翻译工具";
-  import { useRouter,useRoute } from 'vue-router'
-  const router = useRouter()
+  import { useRoute } from 'vue-router'
+
   const route = useRoute()
 
   import UserCenter from '@/components/UserCenter.vue'
-  import { ref } from 'vue'
-  const isLogin = ref(true) // 临时登录状态
+  import UserList from '@/components/UserList.vue'
 
-  const showLogin = () => {
-    alert('你点击了登录按钮')
-    router.push('/login')
-  }
-
-  const showRegister = () => {
-    alert('你点击了注册按钮')
-    router.push('/register')
-  }
 </script>
 
 <template>
   <!-- 顶部导航栏 -->
   <nav v-if="route.path !='/login' && route.path !='/register' && route.path !='/file-manager' " class="header-nav">
-    <!-- 左侧导航区 -->
-    <div class="nav-left">
-      <router-link to="/projects" class="nav-item" exact-active-class="active-link">项目管理</router-link>
-      <router-link to="/memory" class="nav-item" exact-active-class="active-link">记忆库</router-link>
-      <router-link to="/terms" class="nav-item" exact-active-class="active-link">术语库</router-link>
-    </div>
-    
+    <UserList/>
+
     <!-- 中间项目名称 -->
     <div class="nav-center">
       {{ projectName }}
     </div>
 
-      <!-- 右侧模块 -->
-      <div class="nav-right">
-        <UserCenter v-if="isLogin" />
-        <div v-else class="auth-buttons">
-          <el-button size="small" @click="showLogin">登录</el-button>
-          <el-button type="primary" size="small" @click="showRegister">注册</el-button>
-        </div>
-      </div>
+    <!-- 右侧模块 -->
+    <div class="nav-right">
+      <UserCenter/>
+    </div>
 
   </nav>
 
+  <!-- 临时内容 -->
+  <div v-if="route.path == '/projects'" class="temporary-container">
+    请选择用户项目组
+  </div>
+  
   <!-- 路由内容 -->
   <router-view :key="$route.fullPath" v-slot="{ Component }">
     <keep-alive>
       <transition name="fade" mode="out-in">
-        <keep-alive>
-          <component :is="Component" />
-        </keep-alive>
+        <component :is="Component" />
       </transition>
     </keep-alive>
   </router-view>

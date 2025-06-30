@@ -4,6 +4,12 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 import { ref, watch, onMounted} from "vue";
 
+import { useRoute } from "vue-router";
+const route = useRoute();
+const groupId = route.params.teamId;
+console.log('项目组：',groupId)
+
+
 // 定义文件节点类型
 interface FileItem {
   id: string;
@@ -28,11 +34,14 @@ const processChildren = (children: FileItem["children"]): FileItem[] => {
     children: child.children ? processChildren(child.children) : [], // 递归关键点
   }));
 };
+import { useAuthStore } from '@/stores/token';
+
+const authStore = useAuthStore();
 //const isFetched = ref(false)
 const fetchText = async () => {
   //if (isFetched.value) return // 添加缓存判断
   try {
-    const token = localStorage.getItem('token');
+    const token = authStore.token
     if (!token) {
       ElMessage.error('请先登录');
       router.push('/login');
@@ -40,7 +49,7 @@ const fetchText = async () => {
     }
     console.log('请求总督文件：',token);
     const response2 = await fetch(
-      "http://26.143.62.131:8080/file/project/projects",
+      `http://26.143.62.131:8080/file/project/getProjectByGroupId?groupId=${groupId}`,
       {
         method: 'GET', // 指定请求方法
         headers: {
@@ -110,6 +119,7 @@ const fetchText = async () => {
     console.error("请求失败:", error);
   }
 };
+
 // 组件处理数据时添加展开状态
 const onNodeUpdate = (updatedNode: FileItem) => {
   console.log("接收到更新:", updatedNode);
@@ -132,12 +142,10 @@ const updateTreeItem = (list: FileItem[], target: FileItem): FileItem[] => {
         children: updateTreeItem(item.children, target)
       };
     }
-    
     // 不是目标节点且没有子节点，保持不变
     return item;
   });
 };
-
 
 const currentPath = ref(["项目", "目录文件"]); //根目录
 const activeId = ref<string | null>(null); // 统一管理激活状态
@@ -152,8 +160,7 @@ const handleNodeClick = (item: FileItem) => {
     //query: { t: Date.now() } // 防止相同路径缓存
   });
 };
-import { useRoute } from "vue-router";
-const route = useRoute(); // 获取当前路由对象
+
 // 新增路由监听同步状态
 //console.log('你好',route.params.fileId)
 watch(
@@ -183,11 +190,7 @@ const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 const contextMenuData = ref<FileItem | null>(null);
 const contextMenuVisible = ref(false);
-// 清理全局事件监听器
-// onUnmounted(() => {
-//   document.removeEventListener('click', handleGlobalClick);
-//   document.removeEventListener('contextmenu', handleGlobalContextMenu);
-// });
+
 // 处理右键菜单
 const handleNodeContextMenu = (event: MouseEvent, node: FileItem) => {
   event.preventDefault();
@@ -248,6 +251,7 @@ const confirmCreateFile = () => {
   createFileModalVisible.value = false;
   currentParentNode.value = null;
 };
+
 // 新建文件
 const handleAddFile = () => {
   const parentNode = contextMenuData.value;
@@ -258,33 +262,6 @@ const handleAddFile = () => {
     params: { fileId: parentNode.id },
     //query: { t: Date.now() } // 防止相同路径缓存
   });
-  // openCreateFileModal(parentNode);
-  // const newFile: FileItem = {
-  //   id: `file_${Date.now()}`,
-  //   name: '新文件.txt',
-  //   isFolder: false,
-  //   content: ''
-  // };
-  
-  // staticFiles.value = updateTreeWithNewItem(
-  //   staticFiles.value,
-  //   parentNode.id,
-  //   newFile
-  // );
-  
-  // // 展开父文件夹
-  // if (!parentNode.isOpen) {
-  //   const updatedParent: FileItem = {
-  //     ...parentNode,
-  //     isOpen: true
-  //   };
-  //   onNodeUpdate(updatedParent);
-  // }
-
-  // // 确保 DOM 更新完成后再执行其他操作
-  // nextTick(() => {
-  //   closeContextMenu();
-  // });
 };
 
 import { ElMessage } from "element-plus";
@@ -324,8 +301,8 @@ const createRootFolder = async() => {
   createRootFolderVisible.value = false;
   try {
     // 从 localStorage 获取 token
-    const token = localStorage.getItem('token');
-    console.log('token:',token);
+    const token = authStore.token
+    console.log('token2353546:',token);
     // 如果没有 token，提示用户重新登录
     if (!token) {
       ElMessage.error('请先登录');
@@ -339,7 +316,7 @@ const createRootFolder = async() => {
       }
     };
 
-    const response = await axios.post(`http://26.143.62.131:8080/file/project/insert?name=${name}`, 
+    const response = await axios.post(`http://26.143.62.131:8080/file/project/insert?name=${name}&groupId=${groupId}`, 
       {},
       // {
       // name: name,
@@ -353,7 +330,7 @@ const createRootFolder = async() => {
     console.log('文件夹：',newFolder);
     ElMessage.success(`文件夹 "${name}" 创建成功`);
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     console.log('创建文件夹失败:', error);
     // 处理 token 过期或无效的情况
     if (error.response && error.response.status === 401) {
@@ -365,7 +342,6 @@ const createRootFolder = async() => {
     throw error;
   }
 };
-
 
 // 重命名
 const handleRename = async () => {
@@ -384,7 +360,7 @@ const handleRename = async () => {
 
   try {
     // 从 localStorage 获取 token
-    const token = localStorage.getItem("token");
+    const token = authStore.token
     console.log("token:", token);
     // 如果没有 token，提示用户重新登录
     if (!token) {
@@ -435,7 +411,7 @@ const handleDelete = async () => {
 
   const projectId: number = node.id;
   // 从 localStorage 获取 token
-  const token = localStorage.getItem("token");
+  const token = authStore.token
   console.log("token:", token);
   // 如果没有 token，提示用户重新登录
   if (!token) {
@@ -474,7 +450,6 @@ const handleDelete = async () => {
     activeId.value = null;
   }
 };
-
 
 // 辅助函数：在树中添加新节点
 const updateTreeWithNewItem = (nodes: FileItem[], parentId: string, newItem: FileItem): FileItem[] => {
@@ -521,14 +496,14 @@ const removeTreeNode = (nodes: FileItem[], nodeId: string): FileItem[] => {
   }, [] as FileItem[]);
 };
 
-
 // 点击其他区域关闭右键菜单
 document.addEventListener('click', closeContextMenu);
+
+
 
 </script>
 
 <template>
-  
   <!-- 2.左侧文件管理 -->
   <div class="file-manager1">
     <!-- 顶部路径导航 -->
@@ -633,6 +608,7 @@ document.addEventListener('click', closeContextMenu);
   <div v-if="route.path == '/projects'" class="temporary-container">
     请打开文件
   </div>
+  
   <!-- 路由内容 -->
   <router-view :key="$route.fullPath" v-slot="{ Component }">
     <keep-alive>

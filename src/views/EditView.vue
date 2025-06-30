@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref ,onMounted } from "vue";
-import {computed} from "vue";
 
 interface memoryItem {
   sourceText: string
@@ -13,13 +12,12 @@ const pageSentences = ref<{
   originalText: string
   transText: string
   version: number
+  position: number
   isEditing: boolean
   memoryLists: memoryItem[]
 }[]>([])
 
-
-// 哈哈哈哈哈哈哈哈哈哈哈哈
-import { watch } from "vue";
+import { watch , inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
@@ -30,23 +28,22 @@ console.log('id:',id);
 const currentPage = ref(1)      // 当前页码
 const pageSize = ref(10)        // 每页显示数量
 const totalSentences = ref(0)   // 总句子数
-const totalPages = computed(() => Math.ceil(totalSentences.value / pageSize.value)) // 总页数
 
 const currentIndex = ref(0)     // 当前选中的句子索引
 const inputText = ref('')       // 输入框内容
 
 const editingIndex = ref(-1)    // 当前正在编辑的句子索引
-const tempTranslation = ref('') // 临时翻译内容
 const contentRef = ref(null)    // 内容区域引用
 
 import axios from 'axios'
 import { ElMessage } from "element-plus";
 
+
 // 获取当前页数
 const fetchTotalPages = async()=>{
   console.log("请求页数")
       // 从 localStorage 获取 token
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     console.log('token:',token);
     // 如果没有 token，提示用户重新登录
     if (!token) {
@@ -61,7 +58,7 @@ const fetchTotalPages = async()=>{
       }
     };
     // 发送POST请求，包含JSON请求体
-    const response = await axios.post(`http://26.143.62.131:8080/file/getTransTextCount?fileId=${id}`, 
+    const response = await axios.post(`http://26.143.62.131:8080/file/getTeamTransTextCount?fileId=${id}`, 
       null,
       config,
     )
@@ -79,7 +76,7 @@ const fetchPageData = async (page: number = 1, size: number = 10) => {
       size: size
     }
     // 从 localStorage 获取 token
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     console.log('token:',token);
     // 如果没有 token，提示用户重新登录
     if (!token) {
@@ -94,7 +91,7 @@ const fetchPageData = async (page: number = 1, size: number = 10) => {
       }
     };
     // 发送POST请求，包含JSON请求体
-    const response = await axios.post('http://26.143.62.131:8080/file/getTransText', 
+    const response = await axios.post('http://26.143.62.131:8080/file/getTeamTransText', 
       requestBody,
       config,
     )
@@ -103,8 +100,6 @@ const fetchPageData = async (page: number = 1, size: number = 10) => {
     
     const jsonData = await response.data.data
     console.log("hhhh",jsonData);
-    // 更新总句子数
-    //totalSentences.value = jsonData.fullText.length
     
     // 更新当前页数据
     pageSentences.value = jsonData.map((item: any) => ({
@@ -112,6 +107,7 @@ const fetchPageData = async (page: number = 1, size: number = 10) => {
       originalText: item.sourceText,
       transText: item.translatedText,
       version:item.version,
+      position:item.position,
       isEditing: false,
       memoryLists: null,
     }))
@@ -157,99 +153,6 @@ watch(pageSize, async (newSize:any) => {
   await fetchPageData(currentPage.value, newSize)
 })
 
-// 开始编辑句子
-const startEdit = (index: number) => {
-  editingIndex.value = index
-  tempTranslation.value = pageSentences.value[index].transText || ''
-  
-  // 滚动到编辑的句子位置
-  nextTick(() => {
-    const elements = document.querySelectorAll('.translation-pair')
-    if (elements[index]) {
-      elements[index].scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  })
-}
-
-// 临时保存翻译
-const saveTranslation = async (index: number) => {
-  if (!tempTranslation.value.trim()) return
-
-  const sentence = pageSentences.value[index]
-  console.log('替换的：',tempTranslation.value,'替换的：',sentence)
-  sentence.isEditing = 'success'
-  sentence.transText = tempTranslation.value
-  setTimeout(() => {
-    editingIndex.value = -1
-    sentence.isEditing = false
-  }, 1000)
-  // 从 localStorage 获取 token
-  // const token = localStorage.getItem('token');
-  // console.log('token:',token);
-  // // 如果没有 token，提示用户重新登录
-  // if (!token) {
-  //   ElMessage.error('请先登录');
-  //   router.push('/login');
-  //   return;
-  // }
-  // // 设置请求头
-  // const config = {
-  //   headers: {
-  //     'token': token
-  //   }
-  // };
-
-  // try {
-  //   // 构建请求体
-  //   const requestBody = {
-  //     fileId: id, // 文件ID
-  //     list:[
-  //       {
-  //         id: sentence.id,
-  //         sourceText: sentence.originalText,
-  //         translatedText: tempTranslation.value
-  //       }
-  //     ]
-  //   }
-    
-  //   // 显示保存中状态
-  //   sentence.isEditing = 'saving'
-    
-  //   // 发送请求到后端
-  //   const response = await axios.post(`http://26.143.62.131:8080/file/saveTransText`, 
-  //     requestBody,
-  //     config
-  //   )
-    
-  //   console.log("返回结果：",response)
-
-  //   // 更新翻译内容
-  //   sentence.transText = tempTranslation.value
-    
-  //   console.log(`已成功保存第${getGlobalIndex(index) + 1}句的翻译`)
-    
-  //   // 显示保存成功提示
-  //   sentence.isEditing = 'success'
-  //   setTimeout(() => {
-  //     editingIndex.value = -1
-  //     sentence.isEditing = false
-  //   }, 1000)
-    
-  // } catch (error) {
-  //   console.error("保存翻译失败:", error)
-    
-  //   // 显示保存失败提示
-  //   sentence.isEditing = 'error'
-  //   setTimeout(() => {
-  //     sentence.isEditing = true // 恢复编辑状态
-  //   }, 2000)
-  // }
-}
-
-// 取消编辑
-const cancelEdit = () => {
-  editingIndex.value = -1
-}
 
 // 处理分页大小变化
 const handleSizeChange = (newSize: number) => {
@@ -281,7 +184,7 @@ const exportAllPages = async () => {
       const endIdx = Math.min(startIdx + sentencesPerPage, pageSentences.value.length);
       const pageItems = pageSentences.value.slice(startIdx, endIdx);
       
-      const pageContent = pageItems.map((item, index) => {
+      const pageContent = pageItems.map((item:any, index:any) => {
         const globalIndex = startIdx + index + 1;
         const original = item.originalText;
         const translation = item.transText || '待翻译';
@@ -316,7 +219,7 @@ const uploadTranslation = async () => {
   //console.log('替换的：',tempTranslation.value,'替换的：',sentence)
   console.log('批量提交')
   // 从 localStorage 获取 token
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token')
   console.log('token:',token);
   // 如果没有 token，提示用户重新登录
   if (!token) {
@@ -364,205 +267,135 @@ const uploadTranslation = async () => {
   }
 }
 
-// 机械翻译
-const machineTranslation = async (index: number) => {
-  //if (!tempTranslation.value.trim()) return
-
-  const sentence = pageSentences.value[index]
-  console.log('机械替换的:',sentence)
-  sentence.isEditing = 'success'
-
-  //从 localStorage 获取 token
-  const token = localStorage.getItem('token');
-  console.log('token:',token);
-  // 如果没有 token，提示用户重新登录
-  if (!token) {
-    ElMessage.error('请先登录');
-    router.push('/login');
-    return;
-  }
-  // 设置请求头
-  const config = {
-    headers: {
-      'token': token
-    }
-  };
-
-  try {
-    // 构建请求体
-    const requestBody = { 
-      sourceText: sentence.originalText,
-      fileId: id
-    }
-    
-    // 显示保存中状态
-    // sentence.isEditing = 'saving'
-    console.log("机器",requestBody)
-    // 发送请求到后端
-    const response = await axios.post(`http://26.143.62.131:8080/file/translateText`, 
-      requestBody,
-      config
-    )
-    
-    console.log("机器返回结果：",response)
-
-    // 更新翻译内容
-    sentence.transText = response.data.data
-    
-    console.log(`已成功展示第${getGlobalIndex(index) + 1}句的翻译`)
-    
-    console.log(pageSentences.value)
-    // // 显示保存成功提示
-    // sentence.isEditing = 'success'
-    // setTimeout(() => {
-    //   editingIndex.value = -1
-    //   sentence.isEditing = false
-    // }, 1000)
-    
-  } catch (error) {
-    console.error("请求翻译失败:", error)
-    
-    // 显示保存失败提示
-    sentence.isEditing = 'error'
-    setTimeout(() => {
-      sentence.isEditing = true // 恢复编辑状态
-    }, 2000)
-  }
-}
-
-// 回退翻译记录
-const backTranslation = async (index: number) => {
-  const sentence = pageSentences.value[index]
-  console.log('回退翻译记录:',sentence)
-  sentence.isEditing = 'success'
-
-  //从 localStorage 获取 token
-  const token = localStorage.getItem('token');
-  console.log('token:',token);
-  // 如果没有 token，提示用户重新登录
-  if (!token) {
-    ElMessage.error('请先登录');
-    router.push('/login');
-    return;
-  }
-  // 设置请求头
-  const config = {
-    headers: {
-      'token': token
-    }
-  };
-
-  try {
-    // 构建请求体
-    const requestBody = { 
-      transId: sentence.id,
-      version: sentence.version,
-    }
-    
-    // 显示保存中状态
-    // sentence.isEditing = 'saving'
-    console.log("回退",requestBody)
-    // 发送请求到后端
-    const response = await axios.post(`http://26.143.62.131:8080/file/getTranslationHistory`, 
-      requestBody,
-      config
-    )
-    
-    console.log("版本返回结果：",response)
-
-    // 更新翻译内容
-    sentence.transText = response.data.data.translatedText
-    sentence.version = response.data.data.version
-    
-    console.log(`已成功回退第${getGlobalIndex(index) + 1}句的翻译`)
-    
-    console.log(pageSentences.value)
-  } catch (error) {
-    console.error("回退翻译失败:", error)
-    
-    // 显示保存失败提示
-    sentence.isEditing = 'error'
-    setTimeout(() => {
-      sentence.isEditing = true // 恢复编辑状态
-    }, 2000)
-  }
-}
-
-// 记忆列表
-//const memoryList = ref<memoryItem[]>([])
-// 记忆库查询
-const memorySelect = async (index: number) => {
-  const sentence = pageSentences.value[index]
-  console.log('记忆库替换的:',sentence)
-
-  //从 localStorage 获取 token
-  const token = localStorage.getItem('token');
-  console.log('token:',token);
-  // 如果没有 token，提示用户重新登录
-  if (!token) {
-    ElMessage.error('请先登录');
-    router.push('/login');
-    return;
-  }
-  // 设置请求头
-  const config = {
-    headers: {
-      'token': token
-    }
-  };
-
-  try {
-    // 构建请求体
-    const requestBody = { 
-      text: sentence.originalText,
-      transId: sentence.id
-    }
-    
-    // 显示保存中状态
-    // sentence.isEditing = 'saving'
-    console.log("记忆",requestBody)
-    // 发送请求到后端
-    const response = await axios.post(`http://26.143.62.131:8080/file/searchTransPairs`, 
-      requestBody,
-      config
-    )
-    
-    console.log("记忆返回结果：",response)
-    // 记忆列表
-    sentence.memoryList = response.data.data.map((item:any)=>({
-      sourceText: item.sourceText,
-      translatedText: item.translatedText,
-    }))
-
-    console.log("记忆列表:",sentence.memoryList)
-
-    if(sentence.memoryList == null){
-      ElMessage.success(`查询为空！`);
-    }
-
-    if(response.data.code==200 && sentence.memoryList != null){
-      ElMessage.success(`已成功展示第${getGlobalIndex(index) + 1}句的记忆库查询结果`);
-    }
-
-    console.log(`已成功展示第${getGlobalIndex(index) + 1}句的记忆库查询结果`)
-    
-    console.log(pageSentences.value)
-  } catch (error) {
-    console.error("请求翻译失败:", error)
-    
-    // 显示保存失败提示
-    sentence.isEditing = 'error'
-    setTimeout(() => {
-      sentence.isEditing = true // 恢复编辑状态
-    }, 2000)
-  }
-}
-
 onMounted(async () => {
   await fetchTotalPages()
   await fetchPageData()
 })
-//console.log(2,textText.value.value)  machineTranslation
+
+import { onUnmounted, computed } from 'vue'
+import { useDocumentStore } from '../stores/document.ts'
+
+const documentStore = useDocumentStore()
+
+// 使用store中的状态
+const { 
+  initializeWebSocket,
+  disconnect,
+  text,
+  userList,
+  //backText
+} = documentStore;
+
+// const documentContent = computed({
+//   get: () => documentStore.content,
+//   set: (value: string) => documentStore.setContent(value)
+// })
+
+// 1. 连接状态文本（如："连接中..."、"已连接"、"已断开"）
+const connectionStatusText = computed(() => documentStore.connectionStatusText)
+
+// const text = computed(() => documentStore.text)
+// 监听对象属性变化
+watch(
+  () => [text.position, text.transText], // 正确访问：text.position
+  ([newPosition, newTransText]) => {
+    console.log('属性变化:', newPosition, newTransText)
+    if (newPosition !== undefined) {
+      pageSentences.value[newPosition-1].transText = newTransText
+    }
+  }
+  // 不需要 deep: true，因为我们监听的是具体属性，而不是整个对象
+)
+
+// 监听用户列表变化
+watch(
+  () => userList,
+  (newList, oldList) => {
+    console.log('用户列表55555变化:', newList)
+    // 可以在这里执行其他操作，比如更新页面
+  },
+  { deep: true } // 必须设置为 true，才能监听数组内部元素的变化
+)
+
+// 2. 连接状态的 CSS 类（如："text-yellow-500"、"text-green-500"、"text-red-500"）
+//const connectionStatusClass = computed(() => documentStore.connectionStatusClass)
+
+// 3. 文档最后更新时间
+//const lastUpdated = computed(() => documentStore.lastUpdated)
+
+// 4. 正在编辑的用户列表
+//const typingUsers = computed(() => documentStore.typingUsers)
+
+// 5. 编辑日志
+//const editLogs = computed(() => documentStore.editLogs)
+
+// 开始编辑某个句子
+// const startEditing = (sentenceId: string) => {
+//   // 如果已经在编辑同一个句子，则忽略
+//   if (editingSentenceId.value === sentenceId) return;
+  
+//   // 停止之前的输入状态
+//   if (editingSentenceId.value) {
+//     sendUserTyping(false);
+//   }
+  
+//   // 设置新的编辑句子
+//   setEditingSentenceId(sentenceId);
+  
+//   // 发送正在输入状态
+//   sendUserTyping(true);
+// };
+
+let typingTimer: NodeJS.Timeout | null = null;
+//const TYPING_INTERVAL = 3000; // 3秒
+
+const handleInput = (sentenceId: string) => {
+  // 清除之前的定时器
+  // if (typingTimer) clearTimeout(typingTimer);
+  
+  // 发送正在输入状态
+  // if (editingSentenceId.value) {
+  //   sendUserTyping(true);
+  // }
+  
+  // 设置新的定时器，3秒后发送停止输入状态
+  // typingTimer = setTimeout(() => {
+  //   if (editingSentenceId.value == sentenceId) {
+  //     sendUserTyping(false);
+  //   }
+  //   typingTimer = null;
+  // }, TYPING_INTERVAL);
+
+  // 找到当前编辑的句子
+  const currentSentence = pageSentences.value.find(item => item.id === sentenceId);
+  console.log('currentSentence',currentSentence)
+  if (currentSentence) {
+    // 发送消息到服务端
+    const message = {
+      id: currentSentence.id,
+      transText: currentSentence.transText,
+      position: currentSentence.position,
+      fileId: id,
+      originalText: currentSentence.originalText
+    };
+    console.log('message45',message,pageSentences.value[currentSentence.position-1].transText)
+    documentStore.sendContent(message);
+    pageSentences.value[currentSentence.position-1].transText = currentSentence.transText
+    console.log("结束后：",pageSentences.value[currentSentence.position-1])
+  }
+};
+
+console.log()
+
+onMounted(() => {
+  initializeWebSocket();
+});
+
+onUnmounted(() => {
+  disconnect();
+  if (typingTimer) clearTimeout(typingTimer);
+});
+
 </script>
 
 <template>
@@ -598,7 +431,7 @@ onMounted(async () => {
     <div class="translation-content" ref="contentRef">
       <div 
         v-for="(item, index) in pageSentences" 
-        :key="index"
+        :key="item.id"
         class="translation-pair"
         :class="{ 'active-pair': editingIndex === index }">
         
@@ -612,105 +445,30 @@ onMounted(async () => {
             {{ item.originalText }}
           </div>
         </div>
-        
         <!-- 翻译句子 -->
         <div class="translation-sentence">
           <div class="sentence-header">
-            <!-- <span class="sentence-number">{{ getGlobalIndex(index) + 1 }}.</span> -->
             <span class="sentence-label" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;翻译</span>
-            
-            <!-- 编辑状态下显示提交按钮 -->
-            <div v-if="editingIndex === index" class="edit-controls">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="saveTranslation(index)">
-                确定
-              </el-button>
-              <el-button 
-                size="small" 
-                @click="cancelEdit()">
-                取消
-              </el-button>
-            </div>
-            
-            <!-- 非编辑状态下显示编辑按钮 -->
-            <div v-else class="edit-controls">
-              <el-button 
-                type="text" 
-                size="small" 
-                @click="startEdit(index)">
-                <el-icon><Edit /></el-icon>编辑
-              </el-button>
-              <el-button 
-                size="small" 
-                @click="backTranslation(index)">
-                回退版本
-              </el-button>
-              
-              <el-button 
-                size="small" 
-                @click="machineTranslation(index)">
-                机器翻译
-              </el-button>
-            </div>
+            <div>连接状态: <span>{{ connectionStatusText }}</span></div>
           </div>
           
+           <h3>用户列表</h3>
+            <ul>
+              <!-- 循环渲染用户列表 -->
+              <li v-for="user in userList" :key="user.id">
+                {{ user.id }} - {{ user.userName }}
+              </li>
+            </ul>
           <!-- 编辑状态下显示文本框 -->
-          <div v-if="editingIndex === index" class="sentence-editor">
+          <div class="sentence-editor">
             <el-input
-              v-model="tempTranslation"
+              v-model="item.transText"
               type="textarea"
               :rows="3"
               auto-size
               placeholder="请输入翻译内容"
-              @blur="saveTranslation(index)"
+              @input="handleInput(item.id)"
             ></el-input>
-          </div>
-          
-          <!-- 非编辑状态下显示翻译内容 -->
-          <div v-else class="sentence-content">
-            {{ item.transText || '待翻译' }}
-          </div>
-        </div>
-
-        <!-- 记忆库查询 -->
-        <div class="original-sentence">
-          <div class="sentence-header">
-            <!-- <span class="sentence-number">{{ getGlobalIndex(index) + 1 }}.</span> -->
-            <span class="sentence-label" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;记忆库查询</span>
-            <!-- 查询按钮 -->
-            <div  class="edit-controls">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="memorySelect(index)">
-                记忆库查询
-              </el-button>
-            </div>
-          </div>
-
-          <div class="memory-list-container">
-            <div v-if="item.memoryList && item.memoryList.length > 0" 
-                v-for="(item2, index) in item.memoryList" 
-                :key="index" 
-                class="memory-item">
-              <div class="label-row">
-                <span class="index-number">{{ index + 1 }} .</span>
-                <span class="source-label">原文</span>
-              </div>
-              <p class="source-text">{{ item2.sourceText }}</p>
-              
-              <div class="label-row">
-                <span class="translation-label">译文</span>
-              </div>
-              <p class="translated-text">{{ item2.translatedText }}</p>
-            </div>
-          
-            <!-- 当列表为空时显示提示 -->
-            <div v-else class="empty-state">
-              <p>空空如也/(ㄒoㄒ)/~~</p>
-            </div>
           </div>
         </div>
 

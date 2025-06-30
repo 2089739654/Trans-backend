@@ -6,14 +6,17 @@ import 'element-plus/dist/index.css'; // 全局样式
 import { createApp} from "vue";
 import App from "./App.vue";
 import { router } from "./router";
+import { useRouteStore } from './stores/route';
+import { setupAuthStore } from './stores/token'
 // ElMessage
 import "./assets/message-override.css";
-
 import axios from "axios";
+// import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 
-// 哈哈哈哈哈哈哈哈哈哈哈
+import { createPinia } from 'pinia'
+const pinia = createPinia()
 
-// 哈哈哈哈哈哈哈
+// pinia.use(piniaPluginPersistedstate)
 
 const app = createApp(App);
 
@@ -23,10 +26,12 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(ElementPlus);
 app.use(router);
+app.use(pinia)
+
+// 初始化路由状态
+const routeStore = useRouteStore(pinia);
+routeStore.init();
+setupAuthStore();
 app.mount("#app");
 
 app.config.globalProperties.axios = axios; // 通过 this.axios 调用
-
-// Object.keys(Icons).forEach((key) => {
-//   app.component(key, Icons[key]);
-// });

@@ -53,6 +53,19 @@ interface LoginResponse {
   message: string;
 }
 
+// import { useUserStore } from '@/stores/user';
+// const userStore = useUserStore()
+// const userInfo = userStore.getUserInfo
+// userStore.setUserInfo({
+//   userId: 1,
+//   userName: '张三',
+//   accountName: 'zhangsan'
+// })
+
+// import { useAuthStore } from '@/stores/token';
+
+// const authStore = useAuthStore();
+
 // 登陆按钮
 const handleLogin = async () => {
   await formRef.value?.validate((valid: boolean)=> {
@@ -73,6 +86,8 @@ const handleLogin = async () => {
           // 提取并存储用户信息
           const { token, userName, userAccount } = data;
           localStorage.setItem('token', token);
+          //authStore.login(userName, token);
+          console.log('token',localStorage.getItem('token'))
           localStorage.setItem('user', JSON.stringify({
             userName,
             userAccount,

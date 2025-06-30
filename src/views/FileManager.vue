@@ -4,7 +4,8 @@ import axios from 'axios'
 import { useRoute } from "vue-router";
 const route = useRoute();
 const id = route.params.fileId;
-console.log('文件夹：',id)
+const groupId = route.params.teamId
+console.log('文件夹：',id,groupId)
 
 interface FileWithMeta extends File {
   progress: number
@@ -139,6 +140,7 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
   const formData = new FormData()
   // 添加ID字段
   formData.append('projectId', id.toString()); // 确保ID是字符串类型
+  formData.append('groupId', groupId.toString()); 
   // 添加文件
   filesToUpload.forEach(file => {
     formData.append('file', file)
@@ -167,7 +169,7 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
   };
 
   try {
-    const response = await axios.post('http://26.143.62.131:8080/file/upload', 
+    const response = await axios.post(`http://26.143.62.131:8080/file/upload`, 
     formData, config,{
       headers: { 'Content-Type': 'multipart/form-data' },  
       onUploadProgress: progressEvent => {
@@ -187,7 +189,8 @@ const uploadFiles = async (filesToUpload: FileWithMeta[]) => {
     if(response.status==200){
       ElMessage.success("上传成功！");
     }
-    router.push('/projects');
+    router.go(-1) // 正常返回
+    // router.push('/projects');
   } catch (error) {
     handleUploadError(error, filesToUpload)
     emit('upload-error', error)
@@ -228,7 +231,7 @@ const router = useRouter()
 
 // 取消按钮
 const handleBack = () => {
-    if (window.history.length > 1) {
+  if (window.history.length > 1) {
     router.go(-1) // 正常返回
   } else {
     router.push('/projects') // 无历史记录时跳转首页（兜底逻辑）
