@@ -455,7 +455,7 @@ const submitAddGroup = () => {
       //   userIds: [] // 新项目组初始用户列表为空
       // }
       const groupName = addGroupForm.name
-      const token = authStore.token
+      const token = localStorage.getItem("token")
       if (!token) {
         ElMessage.error('请先登录');
         router.push('/login');
