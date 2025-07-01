@@ -17,87 +17,21 @@ const teamId = segments[2]; // 索引2对应路径中的第三个部分
 console.log('提取的teamId:', teamId);
 
 export const useDocumentStore = defineStore('document', () => {
-  // const currentTranslation = ref('');
-  // const connectionStatusText = ref('未连接');
-  // const connectionStatusClass = ref('text-red-500');
+
   const editingSentenceId = ref('');
 
+  interface UserInfo {
+    id: number;
+    userAccount: string;
+    userAvatar?: string | null;
+    userName: string;
+  }
 
-interface UserInfo {
-  id: number;
-  userAccount: string;
-  userAvatar?: string | null;
-  userName: string;
-}
-
-
-
-
-  
-  // 当前编辑的句子ID
-  // const editingSentenceId = ref<string | null>(null);
-  
   // 更新当前编辑的句子ID
   const setEditingSentenceId = (id: string | null) => {
     editingSentenceId.value = id;
   };
   
-  // 计算属性：当前编辑句子的翻译内容
-  // const currentTranslation = computed({
-  //   get: () => {
-  //     if (!editingSentenceId.value) return '';
-  //     const sentence = pageSentences.value.find(s => s.id === editingSentenceId.value);
-  //     return sentence?.transText || '';
-  //   },
-  //   set: (value: string) => {
-  //     if (!editingSentenceId.value) return;
-  //     const sentenceIndex = pageSentences.value.findIndex(s => s.id === editingSentenceId.value);
-  //     if (sentenceIndex !== -1) {
-  //       // 创建新对象以确保响应式更新
-  //       const updatedSentences = [...pageSentences.value];
-  //       updatedSentences[sentenceIndex] = {
-  //         ...updatedSentences[sentenceIndex],
-  //         transText: value
-  //       };
-  //       pageSentences.value = updatedSentences;
-        
-  //       // 发送更新到服务器
-  //       sendSentenceUpdate(updatedSentences[sentenceIndex]);
-  //     }
-  //   }
-  // });
-  
-  // 发送句子更新到服务器
-  // const sendSentenceUpdate = (sentence: any) => {
-  //   if (!socket.value || connectionStatus.value !== 'connected') return;
-    
-  //   socket.value.send(JSON.stringify({
-  //     type: 'EDIT-ACTION',
-  //     fileId: '',
-  //     contextId: sentence.id,
-  //     position: sentence.position,
-  //     content: sentence.transText,
-  //     time: new Date().toISOString()
-  //   }));
-  // };
-
-  // 接收服务器内容更新
-  // const updateContent = (data: any) => {
-  //   // 查找对应的句子并更新
-  //   const sentenceIndex = pageSentences.value.findIndex(s => s.id === data.contextId);
-  //   if (sentenceIndex !== -1) {
-  //     const updatedSentences = [...pageSentences.value];
-  //     updatedSentences[sentenceIndex] = {
-  //       ...updatedSentences[sentenceIndex],
-  //       transText: data.content,
-  //       version: data.version // 如果服务器返回版本信息
-  //     };
-  //     pageSentences.value = updatedSentences;
-  //     lastUpdated.value = new Date().toLocaleTimeString();
-  //   }
-  // };
-
-
 
   // 文档内容
   const content = ref('')
@@ -121,21 +55,6 @@ const text = reactive<TextData>({
 })
 
 const userList= reactive<UserInfo[]>([])
-  // 编辑日志
-  //const editLogs = ref<EditLog[]>([])
-  
-  // 上次更新时间
-  // const lastUpdated = ref<string | null>(null)
-  
-  // // 是否正在同步
-  // const isSyncing = ref(false)
-  
-  // 同步定时器
-  // let syncTimer: NodeJS.Timeout | null = null
-  
-  // // 同步间隔(毫秒)
-  // const SYNC_INTERVAL = 2000 // 2秒
-  
   // 计算属性：连接状态文本
   const connectionStatusText = computed(() => {
     switch(connectionStatus.value) {
@@ -175,16 +94,6 @@ const userList= reactive<UserInfo[]>([])
       socket.value.onopen = () => {
         connectionStatus.value = 'connected'
         console.log('WebSocket连接已建立，状态:', socket.value?.readyState)
-        // socket.value.send(JSON.stringify({
-        //   type: 'auth',
-        //   token: token
-        // }));
-         // 发送测试消息到服务器
-        // socket.value.send(JSON.stringify({
-        //   "type": "join",
-        //   "documentId": "document1",
-        //   "userName": "用户1"
-        // }))
       }
       //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$44
       socket.value.onmessage = (event: any) => {
@@ -201,7 +110,6 @@ const userList= reactive<UserInfo[]>([])
         //backText()
         showInformation(data.user as UserInfo)
         }
-
       }
       
       socket.value.onclose = () => {
@@ -224,19 +132,16 @@ const userList= reactive<UserInfo[]>([])
     }
   }
   
-  // const backText = () => {
-  //     return text.value;
-  // }
   const showInformation  = (user: UserInfo) => {
       // 检查是否存在相同 ID 的用户
-      const exists = userList.some(item => item.id === user.id)
+      //const exists = userList.some(item => item.id === user.id)
       console.log('你好')
-      if (!exists) {
-        userList.push(user)
-        console.log('新增用户:', user)
-      } else {
-        console.log('用户已存在，不重复添加:', user.id)
-      }
+      // 清空列表，仅保留最新用户
+      userList.splice(0, userList.length)
+
+      userList.push(user)
+      console.log('新增用户:', user)
+
       console.log('用户列表',userList)
         // 使用Element Plus的Notification组件显示用户信息
     
@@ -255,6 +160,11 @@ const userList= reactive<UserInfo[]>([])
 
   // 处理"进入编辑"事件
   const handleEditEntry = (user: UserInfo) => {
+      console.log('你好')
+      // 清空列表，仅保留最新用户
+      userList.splice(0, userList.length)
+      userList.push(user)
+      console.log('用户列表',userList)
     // 使用Element Plus的Notification组件显示用户信息
     ElNotification({
       title: '用户进入编辑状态',
@@ -264,7 +174,7 @@ const userList= reactive<UserInfo[]>([])
         <div>账号: ${user.userAccount}</div>
       `,
       type: 'info',
-      duration: 2000, // 5秒后自动关闭
+      duration: 2000, // 2秒后自动关闭
       dangerouslyUseHTMLString: true // 允许使用HTML
     });
   };
@@ -385,13 +295,7 @@ const userList= reactive<UserInfo[]>([])
   // })
  
   return {
-    // editingSentenceId,
-    // currentTranslation,
     setEditingSentenceId,
-
-
-    //backText,
-    // content,
     text,
     userList,
     connectionStatusText,
@@ -401,7 +305,7 @@ const userList= reactive<UserInfo[]>([])
     sendContent,
     setContent,
     // startSyncing,
-    //sendUserTyping,
+    // sendUserTyping,
     disconnect
   }
 })    

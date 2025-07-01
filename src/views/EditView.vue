@@ -286,19 +286,14 @@ const {
   //backText
 } = documentStore;
 
-// const documentContent = computed({
-//   get: () => documentStore.content,
-//   set: (value: string) => documentStore.setContent(value)
-// })
-
-// 1. 连接状态文本（如："连接中..."、"已连接"、"已断开"）
+// 连接状态文本（如："连接中..."、"已连接"、"已断开"）
 const connectionStatusText = computed(() => documentStore.connectionStatusText)
 
 // const text = computed(() => documentStore.text)
 // 监听对象属性变化
 watch(
   () => [text.position, text.transText], // 正确访问：text.position
-  ([newPosition, newTransText]) => {
+  ([newPosition, newTransText]:[number,string]) => {
     console.log('属性变化:', newPosition, newTransText)
     if (newPosition !== undefined) {
       pageSentences.value[newPosition-1].transText = newTransText
@@ -307,11 +302,19 @@ watch(
   // 不需要 deep: true，因为我们监听的是具体属性，而不是整个对象
 )
 
+// 控制列表显示的状态
+const showUserList = ref(false)
+
 // 监听用户列表变化
 watch(
   () => userList,
-  (newList, oldList) => {
-    console.log('用户列表55555变化:', newList)
+  (newList: any) => {
+    console.log('用户列表55555变化:', newList,text.position)
+    showUserList.value = true // 显示列表
+    // 设置定时器，2秒后隐藏
+    setTimeout(() => {
+      showUserList.value = false
+    }, 2000)
     // 可以在这里执行其他操作，比如更新页面
   },
   { deep: true } // 必须设置为 true，才能监听数组内部元素的变化
@@ -320,34 +323,7 @@ watch(
 // 2. 连接状态的 CSS 类（如："text-yellow-500"、"text-green-500"、"text-red-500"）
 //const connectionStatusClass = computed(() => documentStore.connectionStatusClass)
 
-// 3. 文档最后更新时间
-//const lastUpdated = computed(() => documentStore.lastUpdated)
-
-// 4. 正在编辑的用户列表
-//const typingUsers = computed(() => documentStore.typingUsers)
-
-// 5. 编辑日志
-//const editLogs = computed(() => documentStore.editLogs)
-
-// 开始编辑某个句子
-// const startEditing = (sentenceId: string) => {
-//   // 如果已经在编辑同一个句子，则忽略
-//   if (editingSentenceId.value === sentenceId) return;
-  
-//   // 停止之前的输入状态
-//   if (editingSentenceId.value) {
-//     sendUserTyping(false);
-//   }
-  
-//   // 设置新的编辑句子
-//   setEditingSentenceId(sentenceId);
-  
-//   // 发送正在输入状态
-//   sendUserTyping(true);
-// };
-
 let typingTimer: NodeJS.Timeout | null = null;
-//const TYPING_INTERVAL = 3000; // 3秒
 
 const handleInput = (sentenceId: string) => {
   // 清除之前的定时器
@@ -452,12 +428,12 @@ onUnmounted(() => {
             <div>连接状态: <span>{{ connectionStatusText }}</span></div>
           </div>
           
-           <h3>用户列表</h3>
-            <ul>
-              <!-- 循环渲染用户列表 -->
-              <li v-for="user in userList" :key="user.id">
-                {{ user.id }} - {{ user.userName }}
-              </li>
+           {{ console.log("用户就好好睡觉",text.position,item.index+1,index) }}
+            <ul v-if="text.position==index+1 && showUserList">
+              <!-- <h3>最新编辑用户</h3> 循环渲染用户列表 -->
+              <div v-for="user in userList" :key="user.id">
+                最新编辑用户：{{ user.id }} - {{ user.userName }}
+              </div>
             </ul>
           <!-- 编辑状态下显示文本框 -->
           <div class="sentence-editor">
