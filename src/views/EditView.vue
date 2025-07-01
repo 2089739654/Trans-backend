@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref ,onMounted } from "vue";
-import {computed} from "vue";
+import { ref, onMounted, nextTick } from "vue";
+//import {computed} from "vue";
 
 interface memoryItem {
   sourceText: string
@@ -30,7 +30,7 @@ console.log('id:',id);
 const currentPage = ref(1)      // 当前页码
 const pageSize = ref(10)        // 每页显示数量
 const totalSentences = ref(0)   // 总句子数
-const totalPages = computed(() => Math.ceil(totalSentences.value / pageSize.value)) // 总页数
+//const totalPages = computed(() => Math.ceil(totalSentences.value / pageSize.value)) // 总页数
 
 const currentIndex = ref(0)     // 当前选中的句子索引
 const inputText = ref('')       // 输入框内容

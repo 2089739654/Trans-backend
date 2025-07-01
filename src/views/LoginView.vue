@@ -53,6 +53,8 @@ interface LoginResponse {
   message: string;
 }
 
+
+
 // 登陆按钮
 const handleLogin = async () => {
   await formRef.value?.validate((valid: boolean)=> {
@@ -78,6 +80,7 @@ const handleLogin = async () => {
             userAccount,
             id
           }));
+          
           console.log('kkk',localStorage)
           // 设置axios全局请求头
           //axios.defaults.headers.common['token'] = `${token}`;

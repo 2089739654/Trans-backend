@@ -10,7 +10,20 @@
         nickname: '翻译小能手',
         userId: 123
     });
+       interface UserInfo {
+      id: string;
+      userName: string;
+      userAccount: string;
+    }
 
+    // 2. 修正类型断言的语法
+    const userInfo1 = localStorage.getItem('user');
+    const parsedUserInfo: UserInfo = userInfo1 
+      ? JSON.parse(userInfo1) 
+      : null;
+    userInfo.username=parsedUserInfo.userAccount
+    userInfo.nickname=parsedUserInfo.userName
+    userInfo.userId=parsedUserInfo.id
     // 编辑状态
     const editMode = ref(false);
     const tempNickname = ref(userInfo.nickname);
@@ -83,15 +96,15 @@
 
     // 删除翻译记录
     const deleteRecord = (recordId: number) => {
-    translationRecords.value = translationRecords.value.filter(
-        record => record.id !== recordId
-    );
-    ElMessage.success('记录已删除');
+      translationRecords.value = translationRecords.value.filter(
+          record => record.id !== recordId
+      );
+      ElMessage.success('记录已删除');
     };
 
     // 时间格式化
     const formatTime = (row: any, column: any) => {
-    return new Date(row.createTime).toLocaleString();
+      return new Date(row.createTime).toLocaleString();
     };
 </script>
 
@@ -107,7 +120,8 @@
           @click="handleEditAvatar"
         />
         <div class="user-info">
-          <h3 class="username">{{ userInfo.username }}</h3>
+          <h3 class="username">账户名：{{ userInfo.username }}</h3>
+          <h3 class="username">账户ID：{{ userInfo.id }}</h3>
           <p class="nickname">昵称：{{ userInfo.nickname }}</p>
           <el-button
             type="primary"

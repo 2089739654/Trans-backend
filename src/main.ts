@@ -8,8 +8,11 @@ import App from "./App.vue";
 import { router } from "./router";
 // ElMessage
 import "./assets/message-override.css";
+import { useUserStore } from './stores/user'
 
 import axios from "axios";
+// import { createPinia } from 'pinia'
+// const pinia = createPinia()
 
 // 哈哈哈哈哈哈哈哈哈哈哈
 
@@ -20,9 +23,12 @@ const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component as any) // 使用 DefineComponent 类型断言
 }
+// const routeStore = useUserStore(pinia);
+// routeStore.init();
 
 app.use(ElementPlus);
 app.use(router);
+// app.use(pinia)
 app.mount("#app");
 
 app.config.globalProperties.axios = axios; // 通过 this.axios 调用
