@@ -114,6 +114,22 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
         SearchRequest searchRequest=new SearchRequest(INDEX_NAME);
         SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
 
+        BoolQueryBuilder boolQueryBuilder = getBoolQueryBuilder(text, fileId);
+
+        MatchPhraseQueryBuilder matchPhraseQueryBuilder=new MatchPhraseQueryBuilder("sourceText", text);
+        matchPhraseQueryBuilder.slop(2);
+
+        boolQueryBuilder.should(matchPhraseQueryBuilder);
+
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.size(3);
+
+        searchRequest.source(searchSourceBuilder);
+        return searchRequest;
+    }
+
+    @NotNull
+    private static BoolQueryBuilder getBoolQueryBuilder(String text, List<Long> fileId) {
         BoolQueryBuilder boolQueryBuilder=new BoolQueryBuilder();
 
         MatchQueryBuilder matchQueryBuilder=new MatchQueryBuilder("sourceText", text);
@@ -128,17 +144,7 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
         boolQueryBuilder.must(matchQueryBuilder);
         boolQueryBuilder.filter(termsQueryBuilder);
         boolQueryBuilder.filter(termQueryBuilder);
-
-        MatchPhraseQueryBuilder matchPhraseQueryBuilder=new MatchPhraseQueryBuilder("sourceText", text);
-        matchPhraseQueryBuilder.slop(2);
-
-        boolQueryBuilder.should(matchPhraseQueryBuilder);
-
-        searchSourceBuilder.query(boolQueryBuilder);
-        searchSourceBuilder.size(3);
-
-        searchRequest.source(searchSourceBuilder);
-        return searchRequest;
+        return boolQueryBuilder;
     }
 
 

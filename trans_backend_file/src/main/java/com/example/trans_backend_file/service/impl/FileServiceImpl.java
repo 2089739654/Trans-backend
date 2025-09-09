@@ -85,7 +85,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
 
     //可做两阶段提交 补偿事务等 todo
     @Override
-    public Long upload(MultipartFile file, Long projectId) {
+    public Long upload(MultipartFile file, Long projectId,Long groupId) {
         ThrowUtils.throwIf(file.isEmpty(), ErrorCode.PARAMS_ERROR, "文件不能为空");
         String path = null;
         //解析文件名
@@ -110,6 +110,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
         targetFile.setFileSize(file.getSize());
         targetFile.setLngType(LanguageType.ENGLISH.getCode());
         targetFile.setProjectId(projectId);
+        if(groupId!=null) targetFile.setGroupId(groupId);
         //生成sysRecord
         SysRecord sysRecord = new SysRecord();
         AtomicBoolean flag = new AtomicBoolean(false);

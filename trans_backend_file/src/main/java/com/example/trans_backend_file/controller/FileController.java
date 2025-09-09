@@ -9,6 +9,7 @@ import com.example.trans_backend_common.exception.GlobalExceptionHandler;
 import com.example.trans_backend_common.exception.ThrowUtils;
 import com.example.trans_backend_file.model.dto.SelectTransTextRequest;
 import com.example.trans_backend_file.model.entity.File;
+import com.example.trans_backend_file.model.entity.Project;
 import com.example.trans_backend_file.service.FileService;
 import com.example.trans_backend_file.util.MinioUtil;
 import com.oracle.webservices.internal.api.message.PropertySet;
@@ -33,9 +34,9 @@ public class FileController {
     private ApplicationContext applicationContext;
     //todo 文件上传的幂等性保证
     @PostMapping("/upload")
-    public BaseResponse<Long> uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "projectId") Long projectId) {
+    public BaseResponse<Long> uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "projectId") Long projectId,@RequestParam(value = "groupId") Long groupId) {
         ThrowUtils.throwIf(file==null,ErrorCode.PARAMS_ERROR);
-        Long fileId = fileService.upload(file, projectId);
+        Long fileId = fileService.upload(file, projectId,groupId);
         ThrowUtils.throwIf(fileId == null, ErrorCode.SYSTEM_ERROR, "上传失败");
         return ResultUtils.success(fileId);
     }

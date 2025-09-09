@@ -1,0 +1,21 @@
+server:
+  port: 8083
+
+spring:
+  rabbitmq:
+    connection-timeout: 1s
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: false # 禁用自动重试(springboot默认开启 提供的消费者内部的重试)
+    template:
+      retry:
+        enabled: true # 开启超时重试机制  发送方重试
+      mandatory: true # 开启强制投递机制
+    publisher-returns: true  # 开启发布确认机制
+    publisher-confirm-type: correlated
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest

@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.trans_backend_common.context.BaseContext;
 import com.example.trans_backend_common.entity.User;
 import com.example.trans_backend_admin.service.UserService;
 import com.example.trans_backend_admin.mapper.UserMapper;
@@ -101,6 +102,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //脱敏处理
         user.setUserPassword("");
         return user;
+    }
+
+    @Override
+    public void updateName(String name) {
+        UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+        userUpdateWrapper.set("user_name", name);
+        userUpdateWrapper.eq("id", BaseContext.getUser().getId());
+        this.update(userUpdateWrapper);
     }
 
 

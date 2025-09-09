@@ -51,4 +51,11 @@ public class UserController {
         return ResultUtils.success(user);
     }
 
+
+    @PostMapping("/updateName")
+    public BaseResponse<?> updateName(String name){
+        userService.updateName(name);
+        return ResultUtils.success("success");
+    }
+
 }

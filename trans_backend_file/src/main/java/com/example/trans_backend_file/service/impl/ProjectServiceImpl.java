@@ -42,15 +42,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     public List<Project> selectListById(Long userId) {
         QueryWrapper<Project> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        List<Project> projects = baseMapper.selectList(queryWrapper);
-        return projects;
+        return baseMapper.selectList(queryWrapper);
     }
 
     @Override
-    public Project create(Long userId, String name) {
+    public Project create(Long userId, String name,Long groupId) {
         Project project = new Project();
         project.setUserId(userId);
         project.setName(name);
+        if(groupId!=null)project.setGroupId(groupId);
         boolean save = save(project);
         if(save){
             return project;
@@ -86,6 +86,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         fileProjectRecordService.remove(queryWrapper); // 删除项目下的所有翻译对记录
         translationPairsService.remove(new QueryWrapper<TranslationPairs>().in("file_id", idList)); // 删除翻译对记录
         return removeById(projectId);
+    }
+
+    @Override
+    public List<Project> getProjectsByGroupId(Long groupId) {
+        QueryWrapper<Project> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("group_id", groupId);
+        return baseMapper.selectList(queryWrapper);
     }
 
 }

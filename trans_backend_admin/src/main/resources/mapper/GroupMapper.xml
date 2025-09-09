@@ -9,6 +9,17 @@
             <result property="creatorId" column="creator_id" />
             <result property="createTime" column="create_time" />
     </resultMap>
+    <select id="getGroupByUserId" resultType="com.example.trans_backend_admin.model.entity.Group">
+        select `group_`.id,`group_`.create_time,`group_`.creator_id,`group_`.name from group_user_record
+        join `group_` on `group_`.id = group_user_record.group_id
+        where group_user_record.user_id = #{userId}
+    </select>
+    <select id="getUserByGroupId" resultType="com.example.trans_backend_common.entity.User">
+        select user.id, user.user_name
+        from group_user_record
+        join `user` on `user`.id = group_user_record.user_id
+        where group_user_record.group_id = #{groupId}
+    </select>
 
 
 </mapper>

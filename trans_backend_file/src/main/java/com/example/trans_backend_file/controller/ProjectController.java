@@ -1,6 +1,5 @@
 package com.example.trans_backend_file.controller;
 
-import com.aspose.pdf.operators.Re;
 import com.example.trans_backend_common.common.BaseResponse;
 import com.example.trans_backend_common.common.ResultUtils;
 import com.example.trans_backend_common.context.BaseContext;
@@ -38,8 +37,13 @@ public class ProjectController {
     @GetMapping("/projects")
     public BaseResponse<List<Project>> allProjects(){
         List<Project> projects = projectService.selectListById(BaseContext.getUser().getId());
-        ThrowUtils.throwIf(projects==null,ErrorCode.PARAMS_ERROR);
-        return ResultUtils.success(projectService.selectListById(BaseContext.getUser().getId()));
+        return ResultUtils.success(projects);
+    }
+
+    @GetMapping("/getProjectByGroupId")
+    public BaseResponse<List<Project>> getProjectsByGroupId(Long groupId){
+        List<Project> projectsByGroupId = projectService.getProjectsByGroupId(groupId);
+        return ResultUtils.success(projectsByGroupId);
     }
 
     /**
@@ -49,8 +53,8 @@ public class ProjectController {
      */
     @PostMapping("/insert")
     @ApiOperation(value = "创建成功返回项目ID，失败则返回errorcode")
-    public BaseResponse<?> createProject( String name){
-        Project project = projectService.create(BaseContext.getUser().getId(), name);
+    public BaseResponse<?> createProject(String name,Long groupId){
+        Project project = projectService.create(BaseContext.getUser().getId(), name,groupId);
         if(project!=null){
             return ResultUtils.success(project.getId());
         }else{
@@ -85,5 +89,7 @@ public class ProjectController {
             return ResultUtils.error(ErrorCode.PROJECT_DELETE_ERROR);
         }
     }
+
+
 
 }

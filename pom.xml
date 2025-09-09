@@ -15,6 +15,7 @@
         <module>trans_backend_common</module>
         <module>trans_backend_file</module>
         <module>trans_backend_canal</module>
+        <module>trans_backend_socket</module>
     </modules>
 
     <properties>
@@ -65,11 +66,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
         <dependency>
